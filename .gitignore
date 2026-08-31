@@ -1,0 +1,5 @@
+.DS_Store
+*.dc.html
+_ds/
+support.js
+.thumbnail
