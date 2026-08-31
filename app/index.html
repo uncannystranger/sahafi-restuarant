@@ -14,6 +14,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <!-- Direct PDF generation & rich charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -2263,33 +2265,35 @@ select.input { cursor: pointer; appearance: none;
 
   /* ══ monthly report ═════════════════════════════════════════════ */
   function viewReport(v) {
-    const keys = Array.from(new Set(
-      S.data.records.map(r => r.date.slice(0, 7))
-        .concat(S.data.records.filter(r => r.dueDate && r.total - r.paid > 0.001)
-                              .map(r => r.dueDate.slice(0, 7)))
-    )).sort().reverse();
-    // Future months are selectable because payments are promised into them,
-    // but the report opens on the newest month that actually has records —
-    // never on an empty month ahead of today.
-    const served = Array.from(new Set(S.data.records.map(r => r.date.slice(0, 7)))).sort().reverse();
-    const monthKey = S.month && keys.includes(S.month)
-      ? S.month
-      : (served[0] || keys[0] || today().slice(0, 7));
-    const mLabel = monthName(monthKey);
+    const servedMonths = Array.from(new Set(S.data.records.map(r => r.date.slice(0, 7))))
+      .concat(S.data.payments.map(p => p.date.slice(0, 7)))
+      .filter(Boolean);
+    const keys = Array.from(new Set(servedMonths)).sort().reverse();
+    if (!keys.includes(today().slice(0, 7))) keys.unshift(today().slice(0, 7));
 
-    const recs = S.data.records.filter(r => r.date.startsWith(monthKey))
-      .sort((a, b) => a.date.localeCompare(b.date));
-    const pays = S.data.payments.filter(p => p.date.startsWith(monthKey))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    const monthKey = S.month === 'all'
+      ? 'all'
+      : (S.month && (keys.includes(S.month) || S.month === 'all') ? S.month : (keys[0] || today().slice(0, 7)));
+    
+    const isAllTime = monthKey === 'all';
+    const mLabel = isAllTime ? 'Dhammaan Xilliyada (All Time)' : monthName(monthKey);
+
+    const recs = isAllTime
+      ? S.data.records.slice().sort((a, b) => a.date.localeCompare(b.date))
+      : S.data.records.filter(r => r.date.startsWith(monthKey)).sort((a, b) => a.date.localeCompare(b.date));
+      
+    const pays = isAllTime
+      ? (S.data.payments || []).slice().sort((a, b) => a.date.localeCompare(b.date))
+      : (S.data.payments || []).filter(p => p.date.startsWith(monthKey)).sort((a, b) => a.date.localeCompare(b.date));
 
     const total = round2(recs.reduce((t, r) => t + r.total, 0));
     const collected = round2(recs.reduce((t, r) => t + r.paid, 0));
     const outstanding = round2(total - collected);
     const rate = total ? Math.round(collected / total * 100) : 0;
 
-    // Open balances whose promised date lands inside the selected month.
+    // Open balances
     const expected = S.data.records
-      .filter(r => r.total - r.paid > 0.001 && r.dueDate && r.dueDate.startsWith(monthKey))
+      .filter(r => r.total - r.paid > 0.001 && r.dueDate && (isAllTime || r.dueDate.startsWith(monthKey)))
       .sort((a, b) => dueMs(a) - dueMs(b));
     const expectedTotal = round2(expected.reduce((t2, r) => t2 + (r.total - r.paid), 0));
 
@@ -2320,7 +2324,8 @@ select.input { cursor: pointer; appearance: none;
         'margin:0 auto 16px; max-width:1000px">' +
         '<div style="margin-right:auto"><h1>' + t('Monthly Report') + '</h1>' +
           '<p class="sub">Warbixinta buugga oo midabaysan oo toos PDF looga soo dejisan karo.</p></div>' +
-        '<select id="monthSelect" class="input" style="width:auto; min-width:180px" aria-label="' + t('Select report month') + '">' +
+        '<select id="monthSelect" class="input" style="width:auto; min-width:200px" aria-label="' + t('Select report month') + '">' +
+          '<option value="all"' + (monthKey === 'all' ? ' selected' : '') + '>📊 Dhammaan (All Time)</option>' +
           keys.map(k => '<option value="' + k + '"' + (k === monthKey ? ' selected' : '') + '>' +
             monthName(k) + '</option>').join('') +
         '</select>' +
@@ -3075,74 +3080,481 @@ select.input { cursor: pointer; appearance: none;
       render();
     },
     downloadReportPdf: () => {
-      const src = document.getElementById('reportDocContent');
-      if (!src) { window.print(); return; }
-      
-      const restName = (S.profile.name || 'Sahafi_Restaurant').replace(/\s+/g, '_');
-      const filename = `Warbixinta_${restName}_${S.month || today().slice(0, 7)}.pdf`;
+      const JsPDF = window.jspdf ? window.jspdf.jsPDF : null;
+      if (!JsPDF) { window.print(); return; }
 
       toast('📄 PDF-ka waxaa loo diyaarinayaa soo dejin degdeg ah...');
       vibrate(15);
 
-      try {
-        // Clone element and resolve CSS variables/colors so html2canvas renders with 100% full colors & fonts
-        const clone = src.cloneNode(true);
-        clone.id = 'reportDocPdfExport';
-        clone.style.position = 'fixed';
-        clone.style.top = '0';
-        clone.style.left = '-9999px';
-        clone.style.width = '800px';
-        clone.style.maxWidth = '800px';
-        clone.style.background = '#ffffff';
-        clone.style.color = '#241f1b';
-        clone.style.zIndex = '-9999';
-        clone.style.boxShadow = 'none';
-        clone.style.borderRadius = '0';
-        clone.style.transform = 'none';
-        
-        // Remove animation classes from clone so canvas does not capture 0 opacity
-        clone.querySelectorAll('*').forEach(el => {
-          el.style.animation = 'none';
-          el.style.transition = 'none';
-          el.style.opacity = '1';
+      /* ── gather data (mirrors viewReport logic) ──────────────── */
+      const servedMonths = Array.from(new Set(
+        S.data.records.map(r => r.date.slice(0, 7))
+         .concat(S.data.payments.map(p => p.date.slice(0, 7)))
+         .filter(Boolean)
+      )).sort().reverse();
+      const keys = servedMonths.slice();
+      if (!keys.includes(today().slice(0, 7))) keys.unshift(today().slice(0, 7));
+      const monthKey = S.month === 'all' ? 'all'
+        : (S.month && keys.includes(S.month) ? S.month : (keys[0] || today().slice(0, 7)));
+      const isAllTime = monthKey === 'all';
+      const mLabel = isAllTime ? 'Dhammaan Xilliyada (All Time)' : monthName(monthKey);
+
+      const recs = isAllTime
+        ? S.data.records.slice().sort((a, b) => a.date.localeCompare(b.date))
+        : S.data.records.filter(r => r.date.startsWith(monthKey)).sort((a, b) => a.date.localeCompare(b.date));
+      const pays = isAllTime
+        ? (S.data.payments || []).slice().sort((a, b) => a.date.localeCompare(b.date))
+        : (S.data.payments || []).filter(p => p.date.startsWith(monthKey)).sort((a, b) => a.date.localeCompare(b.date));
+
+      const total = round2(recs.reduce((s, r) => s + r.total, 0));
+      const collected = round2(recs.reduce((s, r) => s + r.paid, 0));
+      const outstanding = round2(total - collected);
+      const rate = total ? Math.round(collected / total * 100) : 0;
+
+      const mix = { Paid: 0, Partial: 0, Unpaid: 0, Overdue: 0 };
+      recs.forEach(r => mix[recStatus(r)]++);
+
+      const custIds = Array.from(new Set(recs.map(r => r.customerId)));
+      const monthAccs = custIds.map(id => {
+        const rs = recs.filter(r => r.customerId === id);
+        const c = custOf(id) || { id, name: 'Unknown', phone: '', isRukun: false };
+        const consumed = round2(rs.reduce((s, r) => s + r.total, 0));
+        const paid = round2(rs.reduce((s, r) => s + r.paid, 0));
+        const rem = round2(consumed - paid);
+        return { c, consumed, paid, remaining: rem, count: rs.length,
+          status: rem <= 0.001 ? 'Paid in Full' : (rs.filter(isOverdue).length ? 'Overdue' : (paid > 0.001 ? 'Partially Paid' : 'Unpaid'))
+        };
+      }).sort((a, b) => b.remaining - a.remaining || a.c.name.localeCompare(b.c.name));
+
+      const settled = monthAccs.filter(a => a.remaining <= 0.001);
+      const owing   = monthAccs.filter(a => a.remaining > 0.001);
+      const cur = S.profile.currency || '$';
+      const mn = (n) => cur + (Number.isInteger(round2(n)) ? round2(n) : round2(n).toFixed(2));
+
+      /* ── PDF setup ──────────────────────────────────────────── */
+      const pdf = new JsPDF('p', 'mm', 'a4');
+      const W = pdf.internal.pageSize.getWidth();   // 210
+      const H = pdf.internal.pageSize.getHeight();   // 297
+      const M = 14; // margin
+      const CW = W - M * 2; // content width
+      let y = M;
+      let pageNum = 1;
+
+      /* colors */
+      const COL = {
+        bg:       [243, 233, 219],
+        cream:    [255, 253, 250],
+        cream2:   [250, 243, 233],
+        ink:      [36, 31, 27],
+        ink2:     [93, 83, 72],
+        ink3:     [139, 129, 117],
+        accent:   [198, 113, 57],
+        accent7:  [140, 73, 26],
+        sage:     [111, 129, 88],
+        sage6:    [91, 107, 71],
+        danger:   [176, 68, 41],
+        white:    [255, 255, 255],
+        line:     [220, 208, 192],
+        lineLt:   [235, 225, 212],
+      };
+
+      const setC = (c) => pdf.setTextColor(c[0], c[1], c[2]);
+      const setD = (c) => pdf.setDrawColor(c[0], c[1], c[2]);
+      const setF = (c) => pdf.setFillColor(c[0], c[1], c[2]);
+
+      /* page bg & footer */
+      function drawPageBg() {
+        setF(COL.cream);
+        pdf.rect(0, 0, W, H, 'F');
+        /* top accent bar */
+        setF(COL.accent);
+        pdf.rect(0, 0, W, 3, 'F');
+        /* bottom footer band */
+        setF(COL.cream2);
+        pdf.rect(0, H - 14, W, 14, 'F');
+        setD(COL.lineLt);
+        pdf.line(M, H - 14, W - M, H - 14);
+        pdf.setFontSize(7);
+        setC(COL.ink3);
+        pdf.text((S.profile.name || 'Sahafi Restaurant') + (S.profile.phone ? ' · ' + S.profile.phone : ''), M, H - 7);
+        pdf.text('Bog ' + pageNum, W - M, H - 7, { align: 'right' });
+      }
+      drawPageBg();
+
+      function ensureSpace(need) {
+        if (y + need > H - 20) {
+          pdf.addPage();
+          pageNum++;
+          y = M + 4;
+          drawPageBg();
+        }
+      }
+
+      function sectionTitle(text) {
+        ensureSpace(14);
+        setF(COL.accent);
+        pdf.rect(M, y, 3, 8, 'F');
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        setC(COL.ink);
+        pdf.text(text, M + 7, y + 6);
+        setD(COL.line);
+        pdf.line(M, y + 10, W - M, y + 10);
+        y += 14;
+      }
+
+      /* ── HEADER ─────────────────────────────────────────────── */
+      /* accent header band */
+      setF(COL.accent);
+      pdf.rect(0, 3, W, 38, 'F');
+      /* logo circle */
+      const logoText = (S.profile.name || 'Sahafi').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      setF(COL.white);
+      pdf.circle(W / 2, 14, 7, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.accent);
+      pdf.text(logoText, W / 2, 16, { align: 'center' });
+
+      /* restaurant name */
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.white);
+      pdf.text(S.profile.name || 'Sahafi Restaurant', W / 2, 28, { align: 'center' });
+
+      /* subtitle */
+      pdf.setFontSize(8.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('WARBIXINTA MAALIYADDEED EE BISHA · ' + mLabel, W / 2, 34, { align: 'center' });
+      if (S.profile.phone) {
+        pdf.setFontSize(8);
+        pdf.text(S.profile.phone, W / 2, 38, { align: 'center' });
+      }
+
+      y = 46;
+
+      /* meta row */
+      setF(COL.cream2);
+      pdf.rect(M, y, CW, 10, 'F');
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'normal');
+      setC(COL.ink2);
+      pdf.text('Muddada: ' + mLabel, M + 4, y + 6);
+      pdf.text('Taariikhda: ' + dateLong(today()), W / 2, y + 6, { align: 'center' });
+      setC(COL.sage6);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Runtii La Xaqiijiyay ✓', W - M - 4, y + 6, { align: 'right' });
+      y += 14;
+
+      /* ── EXECUTIVE SUMMARY ──────────────────────────────────── */
+      sectionTitle('Kooban Maaliyadeed (Executive Summary)');
+
+      const statBoxW = (CW - 9) / 4;
+      const statData = [
+        { label: 'Wadarta Lacagaha', value: mn(total), sub: recs.length + ' diiwaano', color: COL.accent },
+        { label: 'La Ururiyay', value: mn(collected), sub: rate + '% la bixiyay', color: COL.sage },
+        { label: 'Haraaga Ku Maqan', value: mn(outstanding), sub: owing.length + ' macmiil', color: outstanding > 0.001 ? COL.danger : COL.sage },
+        { label: 'Macaamiisha', value: String(custIds.length), sub: settled.length + ' dhammaystiray', color: COL.accent },
+      ];
+      statData.forEach((st, i) => {
+        const x = M + i * (statBoxW + 3);
+        setF(COL.white);
+        pdf.roundedRect(x, y, statBoxW, 24, 2, 2, 'F');
+        setF(st.color);
+        pdf.rect(x, y, statBoxW, 3, 'F');
+        pdf.setFontSize(6.5);
+        pdf.setFont('helvetica', 'normal');
+        setC(COL.ink3);
+        pdf.text(st.label, x + statBoxW / 2, y + 8, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        setC(COL.ink);
+        pdf.text(st.value, x + statBoxW / 2, y + 16, { align: 'center' });
+        pdf.setFontSize(6);
+        pdf.setFont('helvetica', 'normal');
+        setC(COL.ink3);
+        pdf.text(st.sub, x + statBoxW / 2, y + 21, { align: 'center' });
+      });
+      y += 28;
+
+      /* collection rate bar */
+      ensureSpace(16);
+      pdf.setFontSize(7.5);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.ink2);
+      pdf.text('Heerka Ururinta (Collection Rate): ' + rate + '%', M, y + 4);
+      y += 7;
+      setF(COL.lineLt);
+      pdf.roundedRect(M, y, CW, 4, 1.5, 1.5, 'F');
+      if (rate > 0) {
+        setF(COL.sage);
+        pdf.roundedRect(M, y, Math.max(CW * rate / 100, 3), 4, 1.5, 1.5, 'F');
+      }
+      y += 9;
+
+      /* ── FINANCIAL BREAKDOWN ────────────────────────────────── */
+      sectionTitle('Shaxanka Xisaabaadka (Financial Breakdown)');
+
+      const halfW = (CW - 6) / 2;
+      /* Left: progress bars */
+      setF(COL.white);
+      pdf.roundedRect(M, y, halfW, 30, 2, 2, 'F');
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.ink2);
+      pdf.text('Kala Qaybsanaanta Xisaabta:', M + 4, y + 7);
+      /* collected bar */
+      pdf.setFontSize(6.5);
+      pdf.setFont('helvetica', 'normal');
+      setC(COL.sage6);
+      pdf.text('La Bixiyay (' + rate + '%): ' + mn(collected), M + 4, y + 14);
+      setF(COL.lineLt);
+      pdf.roundedRect(M + 4, y + 16, halfW - 8, 3, 1, 1, 'F');
+      if (rate > 0) { setF(COL.sage); pdf.roundedRect(M + 4, y + 16, Math.max((halfW - 8) * rate / 100, 2), 3, 1, 1, 'F'); }
+      /* outstanding bar */
+      setC(COL.accent7);
+      pdf.text('Haraaga (' + (100 - rate) + '%): ' + mn(outstanding), M + 4, y + 23);
+      setF(COL.lineLt);
+      pdf.roundedRect(M + 4, y + 25, halfW - 8, 3, 1, 1, 'F');
+      if (100 - rate > 0) { setF(COL.accent); pdf.roundedRect(M + 4, y + 25, Math.max((halfW - 8) * (100 - rate) / 100, 2), 3, 1, 1, 'F'); }
+
+      /* Right: status counts */
+      const rx = M + halfW + 6;
+      setF(COL.white);
+      pdf.roundedRect(rx, y, halfW, 30, 2, 2, 'F');
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.ink2);
+      pdf.text('Xaaladda Diiwaanka:', rx + 4, y + 7);
+      const statusItems = [
+        { label: 'La Bixiyay', val: mix.Paid, col: COL.sage },
+        { label: 'Qayb Bixin', val: mix.Partial, col: COL.accent },
+        { label: 'Aan La Bixin', val: mix.Unpaid, col: COL.ink3 },
+        { label: 'Waqti Dhaafay', val: mix.Overdue, col: COL.danger },
+      ];
+      const miniBoxW = (halfW - 12) / 2;
+      statusItems.forEach((si, i) => {
+        const sx = rx + 4 + (i % 2) * (miniBoxW + 4);
+        const sy = y + 11 + Math.floor(i / 2) * 10;
+        setF(COL.cream2);
+        pdf.roundedRect(sx, sy, miniBoxW, 8, 1, 1, 'F');
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        setC(si.col);
+        pdf.text(String(si.val), sx + 3, sy + 6);
+        pdf.setFontSize(6);
+        pdf.setFont('helvetica', 'normal');
+        setC(COL.ink3);
+        pdf.text(si.label, sx + 14, sy + 5.5);
+      });
+      y += 35;
+
+      /* ── TABLE HELPER ──────────────────────────────────────── */
+      function drawTable(headers, rows, colWidths, options) {
+        const opts = options || {};
+        const rowH = opts.rowHeight || 6;
+        const headerH = 7;
+
+        ensureSpace(headerH + rowH + 4);
+
+        /* header row */
+        setF(COL.accent);
+        pdf.rect(M, y, CW, headerH, 'F');
+        pdf.setFontSize(6.5);
+        pdf.setFont('helvetica', 'bold');
+        setC(COL.white);
+        let hx = M + 2;
+        headers.forEach((h, i) => {
+          const align = (opts.aligns && opts.aligns[i]) || 'left';
+          const tx = align === 'right' ? hx + colWidths[i] - 2 : (align === 'center' ? hx + colWidths[i] / 2 : hx);
+          pdf.text(h, tx, y + 5, { align });
+          hx += colWidths[i];
+        });
+        y += headerH;
+
+        /* data rows */
+        rows.forEach((row, ri) => {
+          ensureSpace(rowH + 2);
+          setF(ri % 2 === 0 ? COL.white : COL.cream2);
+          pdf.rect(M, y, CW, rowH, 'F');
+          pdf.setFontSize(6.5);
+          pdf.setFont('helvetica', 'normal');
+          let cx = M + 2;
+          row.forEach((cell, ci) => {
+            const align = (opts.aligns && opts.aligns[ci]) || 'left';
+            const color = (opts.cellColors && opts.cellColors[ri] && opts.cellColors[ri][ci]) || COL.ink;
+            setC(color);
+            if (opts.boldCols && opts.boldCols.includes(ci)) pdf.setFont('helvetica', 'bold');
+            else pdf.setFont('helvetica', 'normal');
+            const tx = align === 'right' ? cx + colWidths[ci] - 2 : (align === 'center' ? cx + colWidths[ci] / 2 : cx);
+            const cellText = String(cell || '—');
+            const maxChars = Math.floor(colWidths[ci] / 2);
+            pdf.text(cellText.length > maxChars ? cellText.slice(0, maxChars - 1) + '..' : cellText, tx, y + 4.2, { align });
+            cx += colWidths[ci];
+          });
+          y += rowH;
         });
 
-        document.body.appendChild(clone);
-
-        if (typeof html2pdf !== 'undefined') {
-          const opt = {
-            margin:       [10, 10, 10, 10],
-            filename:     filename,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  {
-              scale: 2,
-              useCORS: true,
-              logging: false,
-              backgroundColor: '#ffffff',
-              windowWidth: 1000
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-          };
-
-          html2pdf().set(opt).from(clone).save().then(() => {
-            if (document.body.contains(clone)) document.body.removeChild(clone);
-            toast('✅ Warbixinta PDF-ka si guul leh ayaa loo soo dejiyay!');
-            vibrate([20, 30, 20]);
-            launchConfetti();
-          }).catch(err => {
-            console.error('PDF export error:', err);
-            if (document.body.contains(clone)) document.body.removeChild(clone);
-            window.print();
-          });
-        } else {
-          if (document.body.contains(clone)) document.body.removeChild(clone);
-          window.print();
-        }
-      } catch (e) {
-        console.error('PDF fallback trigger:', e);
-        window.print();
+        /* bottom line */
+        setD(COL.line);
+        pdf.line(M, y, W - M, y);
+        y += 4;
       }
+
+      /* ── CUSTOMER ACCOUNTS TABLE ────────────────────────────── */
+      if (monthAccs.length > 0) {
+        sectionTitle('Xisaabaadka Macaamiisha (' + monthAccs.length + ' macmiil)');
+        const cHeaders = ['Macmiilka', 'Nooc', 'Taleefanka', 'Cuntada', 'La Bixiyay', 'Haraaga', 'Xaaladda'];
+        const cWidths = [CW * 0.20, CW * 0.11, CW * 0.14, CW * 0.14, CW * 0.14, CW * 0.14, CW * 0.13];
+        const cAligns = ['left', 'center', 'left', 'right', 'right', 'right', 'center'];
+        const cRows = monthAccs.map(a => [
+          a.c.name,
+          a.c.isRukun ? 'Rukun' : 'Deyn',
+          a.c.phone || '—',
+          mn(a.consumed),
+          mn(a.paid),
+          mn(a.remaining),
+          a.status === 'Paid in Full' ? 'La Bixiyay' : (a.status === 'Overdue' ? 'Dhaafay' : (a.status === 'Partially Paid' ? 'Qayb' : 'Aan Bixin'))
+        ]);
+        const cColors = monthAccs.map(a => {
+          const sc = a.status === 'Paid in Full' ? COL.sage6 : (a.status === 'Overdue' ? COL.danger : COL.ink);
+          return [COL.ink, COL.accent, COL.ink3, COL.ink, COL.sage6, a.remaining > 0.001 ? COL.danger : COL.sage6, sc];
+        });
+        drawTable(cHeaders, cRows, cWidths, { aligns: cAligns, cellColors: cColors, boldCols: [0, 5] });
+      }
+
+      /* ── TRANSACTION HISTORY TABLE ─────────────────────────── */
+      if (recs.length > 0) {
+        sectionTitle('Taariikhda Waxqabadka (' + recs.length + ' diiwaano)');
+        const tHeaders = ['Taariikh', 'Macmiilka', 'Cuntada', 'Qaddarka', 'La Bixiyay', 'Haraaga', 'Xaaladda'];
+        const tWidths = [CW * 0.13, CW * 0.18, CW * 0.18, CW * 0.13, CW * 0.13, CW * 0.13, CW * 0.12];
+        const tAligns = ['left', 'left', 'left', 'right', 'right', 'right', 'center'];
+        const tRows = recs.map(r => {
+          const c = custOf(r.customerId) || { name: 'Unknown' };
+          const st = recStatus(r);
+          return [
+            r.date,
+            c.name,
+            r.food || '—',
+            mn(r.total),
+            mn(r.paid),
+            mn(r.total - r.paid),
+            st === 'Paid' ? 'La Bixiyay' : (st === 'Overdue' ? 'Dhaafay' : (st === 'Partial' ? 'Qayb' : 'Aan Bixin'))
+          ];
+        });
+        const tColors = recs.map(r => {
+          const st = recStatus(r);
+          const sc = st === 'Paid' ? COL.sage6 : (st === 'Overdue' ? COL.danger : COL.ink3);
+          return [COL.ink3, COL.ink, COL.ink2, COL.ink, COL.sage6, (r.total - r.paid) > 0.001 ? COL.danger : COL.sage6, sc];
+        });
+        drawTable(tHeaders, tRows, tWidths, { aligns: tAligns, cellColors: tColors, boldCols: [1, 5] });
+      }
+
+      /* ── PAYMENTS RECEIVED TABLE ───────────────────────────── */
+      if (pays.length > 0) {
+        const payTotal = round2(pays.reduce((s, p) => s + p.amount, 0));
+        sectionTitle('Lacagaha La Helay (' + mn(payTotal) + ')');
+        const pHeaders = ['Taariikh', 'Macmiilka', 'Habka', 'Lacagta'];
+        const pWidths = [CW * 0.20, CW * 0.30, CW * 0.25, CW * 0.25];
+        const pAligns = ['left', 'left', 'left', 'right'];
+        const pRows = pays.map(p => {
+          const c = custOf(p.customerId) || { name: 'Unknown' };
+          return [p.date, c.name, p.note || 'Cash', mn(p.amount)];
+        });
+        const pColors = pays.map(() => [COL.ink3, COL.ink, COL.ink2, COL.sage6]);
+        drawTable(pHeaders, pRows, pWidths, { aligns: pAligns, cellColors: pColors, boldCols: [1, 3] });
+      }
+
+      /* ── CLOSING SUMMARY ────────────────────────────────────── */
+      sectionTitle('Kooban Xidhitaanka (Closing Summary)');
+      ensureSpace(50);
+
+      setF(COL.cream2);
+      pdf.roundedRect(M, y, CW, 40, 2, 2, 'F');
+      setD(COL.line);
+      pdf.roundedRect(M, y, CW, 40, 2, 2, 'S');
+
+      const sumLeft = [
+        ['Wadarta waxqabadka cuntada:', String(recs.length)],
+        ['Macaamiisha adeegay:', String(custIds.length)],
+        ['Kuwa dhammaystiray:', String(settled.length)],
+        ['Kuwa weli deynta ku jira:', String(owing.length)],
+      ];
+      const sumRight = [
+        ['Wadarta lacagaha:', mn(total)],
+        ['Wadarta la ururiyay:', mn(collected)],
+        ['Haraaga ku maqan:', mn(outstanding)],
+        ['Miisaaniyada xidhitaanka:', mn(outstanding)],
+      ];
+
+      pdf.setFontSize(7.5);
+      sumLeft.forEach((row, i) => {
+        pdf.setFont('helvetica', 'normal');
+        setC(COL.ink2);
+        pdf.text(row[0], M + 6, y + 8 + i * 8);
+        pdf.setFont('helvetica', 'bold');
+        setC(COL.ink);
+        pdf.text(row[1], M + halfW - 6, y + 8 + i * 8, { align: 'right' });
+      });
+      sumRight.forEach((row, i) => {
+        pdf.setFont('helvetica', 'normal');
+        setC(COL.ink2);
+        pdf.text(row[0], M + halfW + 10, y + 8 + i * 8);
+        pdf.setFont('helvetica', 'bold');
+        setC(i === 3 ? COL.accent : COL.ink);
+        if (i === 3) pdf.setFontSize(9);
+        pdf.text(row[1], W - M - 6, y + 8 + i * 8, { align: 'right' });
+        if (i === 3) pdf.setFontSize(7.5);
+      });
+      y += 46;
+
+      /* ── SIGNATURE & STAMP ─────────────────────────────────── */
+      ensureSpace(40);
+      setD(COL.line);
+      pdf.setLineDashPattern([2, 1.5], 0);
+      pdf.line(M, y, W - M, y);
+      pdf.setLineDashPattern([], 0);
+      y += 8;
+
+      /* signature line */
+      const sigX = M + 10;
+      setD(COL.ink);
+      pdf.line(sigX, y + 10, sigX + 55, y + 10);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.ink);
+      pdf.text('Saxiixa Maamulka', sigX + 27.5, y + 16, { align: 'center' });
+      pdf.setFontSize(6);
+      pdf.setFont('helvetica', 'normal');
+      setC(COL.ink3);
+      pdf.text('General Manager Signature', sigX + 27.5, y + 20, { align: 'center' });
+
+      /* stamp circle */
+      const stampX = W - M - 30;
+      setD(COL.accent);
+      pdf.setLineDashPattern([1.5, 1], 0);
+      pdf.circle(stampX, y + 8, 10, 'S');
+      pdf.setLineDashPattern([], 0);
+      pdf.setFontSize(5.5);
+      pdf.setFont('helvetica', 'bold');
+      setC(COL.accent);
+      pdf.text('SHAAMBADDA', stampX, y + 6, { align: 'center' });
+      pdf.text('RASMIGA AH', stampX, y + 10, { align: 'center' });
+      pdf.setFontSize(6);
+      pdf.setFont('helvetica', 'normal');
+      setC(COL.ink);
+      pdf.text('Shaambadda Rasmiga', stampX, y + 22, { align: 'center' });
+      pdf.setFontSize(5.5);
+      setC(COL.ink3);
+      pdf.text('Official Restaurant Stamp', stampX, y + 26, { align: 'center' });
+
+      /* ── SAVE ───────────────────────────────────────────────── */
+      const restName = (S.profile.name || 'Sahafi_Restaurant').replace(/\s+/g, '_');
+      const filename = 'Warbixinta_' + restName + '_' + (S.month || today().slice(0, 7)) + '.pdf';
+      pdf.save(filename);
+      toast('✅ Warbixinta PDF-ka si guul leh ayaa loo soo dejiyay!');
+      vibrate([20, 30, 20]);
+      launchConfetti();
     },
     print: () => window.print(),
     pickLogo: () => { const i = document.getElementById('logoInput'); if (i) i.click(); },
