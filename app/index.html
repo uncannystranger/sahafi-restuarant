@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="so">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -868,7 +868,7 @@ select.input { cursor: pointer; appearance: none;
   }
 
   function loadProfile() {
-    const base = { name: 'Sahafi Restaurant', phone: '+252 61 555 0100', currency: '$', logo: '', lang: 'en' };
+    const base = { name: 'Sahafi Restaurant', phone: '+252 61 555 0100', currency: '$', logo: '', lang: 'so' };
     try {
       const raw = localStorage.getItem(PROFILE_KEY);
       if (raw) return Object.assign(base, JSON.parse(raw) || {});
@@ -1041,8 +1041,8 @@ select.input { cursor: pointer; appearance: none;
     return mine.concat(CHIPS.filter(c => !mine.some(m => m.toLowerCase() === c.toLowerCase())));
   };
 
-  const isSo = () => S.lang === 'so';
-  const t = (k) => (isSo() && SO[k]) ? SO[k] : k;
+  const isSo = () => true;
+  const t = (k) => SO[k] || k;
 
   const SO_MONTH = ['Jannaayo', 'Febraayo', 'Maarso', 'Abriil', 'Maajo', 'Juun',
                     'Luuliyo', 'Agoosto', 'Sebtembar', 'Oktoobar', 'Nofembar', 'Diseembar'];
@@ -1731,7 +1731,7 @@ select.input { cursor: pointer; appearance: none;
               '<button class="linkish" data-act="openCustomer" data-id="' + r.customerId + '" style="margin-right:auto; font-weight:600">' + esc(c.name) + '</button>' +
               '<span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span>' +
             '</div>' +
-            '<div class="sub" style="font-size:12.5px">' + esc(r.food) + ' · served ' + dateLabel(r.date) + '</div>' +
+            '<div class="sub" style="font-size:12.5px">' + esc(r.food) + ' · la qaday ' + dateLabel(r.date) + '</div>' +
             (r.dueDate ? '<div style="font-size:12px; ' + (isOverdue(r) ? 'color:var(--danger-700)' : 'color:var(--ink-2)') + '">' +
               (isOverdue(r) ? F.overdueSince('') : F.expectedOn('')) + dateLong(r.dueDate) + (r.dueTime ? ' — ' + timeLabel(r.dueTime) : '') + '</div>' : '') +
             '<div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap">' +
@@ -1980,7 +1980,7 @@ select.input { cursor: pointer; appearance: none;
                 '<button class="icon-btn" data-act="editRecord" data-id="' + r.id + '" title="' + t('Edit') + '" aria-label="' + t('Edit record') + '">' + ic('edit', 14, 2) + '</button>' +
                 '<button class="icon-btn danger" data-act="deleteRecord" data-id="' + r.id + '" title="' + t('Delete') + '" aria-label="' + t('Delete record') + '">' + ic('trash', 14, 2) + '</button>' +
               '</div></td></tr>';
-          }).join('') : '<tr><td colspan="8" class="sub" style="text-align:center; padding:26px">No food recorded yet.</td></tr>') +
+          }).join('') : '<tr><td colspan="8" class="sub" style="text-align:center; padding:26px">Wali cunto lama diiwaangelin.</td></tr>') +
           '</tbody></table></div>' +
         '</section>' +
 
@@ -1994,8 +1994,8 @@ select.input { cursor: pointer; appearance: none;
               ? '<div style="font-family:Lora,serif; font-weight:600; font-size:16px; margin-top:3px; line-height:1.35">' + dueSentence(a) + '</div>' +
                 '<p class="sub" style="font-size:12.5px; margin-top:6px">' + F.stillOwed(money(a.remaining), a.openCount) + '</p>' +
                 (a.notes.length ? '<p class="sub" style="font-size:12px; margin-top:6px; font-style:italic">“' + esc(a.notes.join(' · ')) + '”</p>' : '') +
-                '<button class="btn btn-primary btn-sm btn-block" data-act="openPay" data-id="' + a.id + '" style="margin-top:12px">Record payment</button>'
-              : '<div style="font-family:Lora,serif; font-weight:600; font-size:18px; margin-top:4px; color:var(--sage-600)">Paid in full</div>' +
+                '<button class="btn btn-primary btn-sm btn-block" data-act="openPay" data-id="' + a.id + '" style="margin-top:12px">' + t('Record payment') + '</button>'
+              : '<div style="font-family:Lora,serif; font-weight:600; font-size:18px; margin-top:4px; color:var(--sage-600)">' + t('Paid in full') + '</div>' +
                 '<p class="sub" style="font-size:12.5px; margin-top:4px">' + t('Nothing outstanding on this account.') + '</p>') +
           '</section>' +
 
@@ -2298,9 +2298,6 @@ select.input { cursor: pointer; appearance: none;
             '<input id="pPhone" class="input" value="' + esc(S.profile.phone) + '"></div>' +
           '<div class="field"><label for="pCurrency">' + t('Currency symbol') + '</label>' +
             '<input id="pCurrency" class="input" value="' + esc(S.profile.currency) + '" style="max-width:110px"></div>' +
-          '<div class="field"><label>' + t('Language') + '</label>' +
-            '<div style="display:flex; align-items:center; gap:10px">' + langToggle() +
-              '<span class="sub" style="font-size:12.5px">' + t(S.lang === 'so' ? 'Somali' : 'English') + '</span></div></div>' +
         '</div>' +
       '</section>' +
 
@@ -2348,7 +2345,6 @@ select.input { cursor: pointer; appearance: none;
       '<div class="brand">' + logoMark('brand-logo') +
         '<div style="min-width:0"><div class="brand-name">' + esc(S.profile.name || 'Sahafi') + '</div>' +
         '<div class="eyebrow" style="font-size:9.5px">' + t('Rent Book') + '</div></div></div>' +
-      '<div style="display:flex; justify-content:flex-end; margin-top:-14px; padding:0 4px">' + langToggle() + '</div>' +
 
       '<nav style="display:flex; flex-direction:column; gap:3px" aria-label="' + t('Main') + '">' +
         NAV.map(([key, label, icon]) =>
@@ -2377,7 +2373,6 @@ select.input { cursor: pointer; appearance: none;
   const viewMobileBar = () =>
     '<header class="mobile-bar no-print">' + logoMark('brand-logo') +
       '<div class="brand-name" style="margin-right:auto">' + esc(S.profile.name || 'Sahafi') + '</div>' +
-      langToggle() +
       '<button class="btn btn-primary btn-sm" data-act="openAdd">' + ic('plus', 15, 2.3) + t('Record') + '</button>' +
     '</header>';
 
