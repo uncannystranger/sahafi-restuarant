@@ -3075,8 +3075,8 @@ select.input { cursor: pointer; appearance: none;
       render();
     },
     downloadReportPdf: () => {
-      const el = document.getElementById('reportDocContent');
-      if (!el) { window.print(); return; }
+      const src = document.getElementById('reportDocContent');
+      if (!src) { window.print(); return; }
       
       const restName = (S.profile.name || 'Sahafi_Restaurant').replace(/\s+/g, '_');
       const filename = `Warbixinta_${restName}_${S.month || today().slice(0, 7)}.pdf`;
@@ -3084,24 +3084,63 @@ select.input { cursor: pointer; appearance: none;
       toast('📄 PDF-ka waxaa loo diyaarinayaa soo dejin degdeg ah...');
       vibrate(15);
 
-      if (typeof html2pdf !== 'undefined') {
-        const opt = {
-          margin:       [8, 8, 8, 8],
-          filename:     filename,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-        html2pdf().set(opt).from(el).save().then(() => {
-          toast('✅ Warbixinta PDF-ka si guul leh ayaa loo soo dejiyay!');
-          vibrate([20, 30, 20]);
-          launchConfetti();
-        }).catch(err => {
-          console.error('PDF download error:', err);
-          window.print();
+      try {
+        // Clone element and resolve CSS variables/colors so html2canvas renders with 100% full colors & fonts
+        const clone = src.cloneNode(true);
+        clone.id = 'reportDocPdfExport';
+        clone.style.position = 'fixed';
+        clone.style.top = '0';
+        clone.style.left = '-9999px';
+        clone.style.width = '800px';
+        clone.style.maxWidth = '800px';
+        clone.style.background = '#ffffff';
+        clone.style.color = '#241f1b';
+        clone.style.zIndex = '-9999';
+        clone.style.boxShadow = 'none';
+        clone.style.borderRadius = '0';
+        clone.style.transform = 'none';
+        
+        // Remove animation classes from clone so canvas does not capture 0 opacity
+        clone.querySelectorAll('*').forEach(el => {
+          el.style.animation = 'none';
+          el.style.transition = 'none';
+          el.style.opacity = '1';
         });
-      } else {
+
+        document.body.appendChild(clone);
+
+        if (typeof html2pdf !== 'undefined') {
+          const opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff',
+              windowWidth: 1000
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+          };
+
+          html2pdf().set(opt).from(clone).save().then(() => {
+            if (document.body.contains(clone)) document.body.removeChild(clone);
+            toast('✅ Warbixinta PDF-ka si guul leh ayaa loo soo dejiyay!');
+            vibrate([20, 30, 20]);
+            launchConfetti();
+          }).catch(err => {
+            console.error('PDF export error:', err);
+            if (document.body.contains(clone)) document.body.removeChild(clone);
+            window.print();
+          });
+        } else {
+          if (document.body.contains(clone)) document.body.removeChild(clone);
+          window.print();
+        }
+      } catch (e) {
+        console.error('PDF fallback trigger:', e);
         window.print();
       }
     },
