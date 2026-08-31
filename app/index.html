@@ -1990,10 +1990,11 @@ select.input { cursor: pointer; appearance: none;
         '</div>' +
       '</div></td></tr>';
 
-    const rowsHtml = accs.map(a => {
-      const open = S.expanded === a.id;
-      const cells = v.desktop
-        ? '<td><button class="linkish" data-act="expand" data-id="' + a.id + '">' +
+    let body;
+    if (v.desktop) {
+      const rowsHtml = accs.map(a => {
+        const open = S.expanded === a.id;
+        const cells = '<td><button class="linkish" data-act="expand" data-id="' + a.id + '">' +
             '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
             '<span><span style="display:block">' + esc(a.name) + '</span>' +
             '<span style="display:block; font-size:11px; color:var(--ink-3); font-weight:400">' + esc(a.phone || '—') + '</span></span></button></td>' +
@@ -2009,34 +2010,58 @@ select.input { cursor: pointer; appearance: none;
             '<button class="icon-btn" data-act="openCustomer" data-id="' + a.id + '" title="' + t('View details') + '" aria-label="' + esc(F.viewCustomer(a.name)) + '">' + ic('user', 15, 2) + '</button>' +
             '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '" aria-label="' + esc(F.quickLookAt(a.name)) + '">' +
               '<span style="display:block; transition:transform .25s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
-          '</div></td>'
-        : '<td><button class="linkish" data-act="expand" data-id="' + a.id + '">' +
-            '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
-            '<span><span style="display:block">' + esc(a.name) + '</span>' +
-            '<span style="display:block; font-size:11px; color:var(--ink-3); font-weight:400">' + esc(a.phone || '—') + '</span></span></button></td>' +
-          '<td class="r n" style="font-weight:600">' + money(a.remaining) + '</td>' +
-          '<td><span data-badgekey="c.' + a.id + '" data-badgeval="' + a.status + '">' + badge(a.status) + '</span></td>' +
-          '<td><div style="display:flex; gap:5px; justify-content:flex-end">' +
-            '<button class="icon-btn" data-act="openPay" data-id="' + a.id + '" aria-label="' + esc(F.recordPaymentFor(a.name)) + '">' + ic('card', 15, 2) + '</button>' +
-            '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" aria-expanded="' + open + '" aria-label="' + esc(F.quickLookAt(a.name)) + '">' +
-              '<span style="display:block; transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
           '</div></td>';
-      return '<tr>' + cells + '</tr>' + (open ? expandPanel(a) : '');
-    }).join('');
+        return '<tr>' + cells + '</tr>' + (open ? expandPanel(a) : '');
+      }).join('');
 
-    const head = v.desktop
-      ? '<tr><th>' + t('Customer') + '</th>' + (v.wide ? '<th class="r">' + t('Consumed') + '</th>' : '') +
+      const head = '<tr><th>' + t('Customer') + '</th>' + (v.wide ? '<th class="r">' + t('Consumed') + '</th>' : '') +
         '<th class="r">' + t('Paid') + '</th><th class="r">' + t('Haraa') + '</th>' +
         (v.wide ? '<th>' + t('Last') + '</th>' : '') + '<th>' + t('Expected payment') + '</th>' +
         (v.wide ? '<th style="text-align:center">' + t('Txns') + '</th>' : '') +
-        '<th>' + t('Status') + '</th><th class="r">' + t('Actions') + '</th></tr>'
-      : '<tr><th>' + t('Customer') + '</th><th class="r">' + t('Haraa') + '</th><th>' + t('Status') +
-        '</th><th class="r">' + t('Actions') + '</th></tr>';
+        '<th>' + t('Status') + '</th><th class="r">' + t('Actions') + '</th></tr>';
+
+      body = '<div class="tbl-scroll"><table class="tbl"><thead>' + head + '</thead><tbody>' + rowsHtml + '</tbody></table></div>';
+    } else {
+      /* Mobile view: full cards with direct actions — no horizontal scrolling needed! */
+      body = '<div style="display:flex; flex-direction:column; gap:11px; padding:4px 0">' +
+        accs.map(a => {
+          const open = S.expanded === a.id;
+          const phoneClean = cleanPhone(a.phone);
+          return '<div style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:13px 14px; display:flex; flex-direction:column; gap:9px">' +
+            '<div style="display:flex; align-items:flex-start; gap:10px">' +
+              '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
+              '<div style="margin-right:auto; min-width:0">' +
+                '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-weight:600; font-size:14.5px; text-align:left">' + esc(a.name) + '</button>' +
+                (a.phone ? '<span style="display:block; font-size:11.5px; color:var(--ink-3)">' + esc(a.phone) + '</span>' : '') +
+              '</div>' +
+              '<span data-badgekey="c.' + a.id + '" data-badgeval="' + a.status + '">' + badge(a.status) + '</span>' +
+            '</div>' +
+
+            '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--solid-1); padding:8px 12px; border-radius:var(--r-sm); font-size:12.5px">' +
+              '<span class="muted">' + t('Outstanding Haraa') + '</span>' +
+              '<span class="num" style="font-weight:700; font-size:16px; ' + (a.remaining > 0.001 ? 'color:var(--accent-700)' : 'color:var(--sage-600)') + '">' + money(a.remaining) + '</span>' +
+            '</div>' +
+
+            (a.next ? '<div style="font-size:12px; ' + (a.nextOverdue ? 'color:var(--danger-700); font-weight:500' : 'color:var(--ink-2)') + '">' +
+              (a.nextOverdue ? F.overdueSince('') : F.due('')) + dateLong(a.next.dueDate) + (a.next.dueTime ? ' — ' + timeLabel(a.next.dueTime) : '') + '</div>' : '') +
+
+            /* Direct visible action buttons on mobile — completely zero sliding */
+            '<div style="display:flex; gap:7px; align-items:center; flex-wrap:wrap; margin-top:2px">' +
+              (a.remaining > 0.001 ? '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('card', 14, 2) + t('Pay') + '</button>' : '') +
+              (a.phone && a.remaining > 0.001 ? '<a href="https://wa.me/' + phoneClean + '?text=' + encodeURIComponent('Asc ' + a.name + ', waxaan kaa soo xasuusinaynaa haraagaaga ' + money(a.remaining) + ' ee ' + (S.profile.name || 'Sahafi') + '.') + '" target="_blank" rel="noopener" class="btn-whatsapp" style="text-decoration:none; padding:7px 11px; font-size:12px">' + ic('whatsapp', 14, 2) + 'WhatsApp</a>' : '') +
+              '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('user', 14, 2) + 'Eeg</button>' +
+              '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '">' +
+                '<span style="display:block; transition:transform .25s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
+            '</div>' +
+
+            (open ? '<div style="margin-top:8px; border-top:1px solid var(--glass-edge); padding-top:10px">' + expandPanel(a) + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
 
     return '<div class="wrap anim-fade">' + custHead(all) + controls +
-      '<section class="sheet" style="padding:6px 18px 10px">' +
-        '<div class="tbl-scroll"><table class="tbl"><thead>' + head + '</thead><tbody>' + rowsHtml + '</tbody></table></div>' +
-      '</section>' +
+      '<section class="sheet" style="padding:6px 18px 10px">' + body + '</section>' +
     '</div>';
   }
 
