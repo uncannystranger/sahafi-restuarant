@@ -587,20 +587,21 @@ select.input { cursor: pointer; appearance: none;
   box-shadow: var(--sh-md); overflow: hidden; max-width: 1000px; margin-inline: auto;
 }
 .report-head {
-  display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap;
-  padding: 30px 38px 24px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+  padding: 34px 38px 24px;
   background: linear-gradient(160deg, #fdf4ea, #f8ebdb);
   border-bottom: 1px solid var(--glass-edge);
 }
 .report-logo {
-  width: 62px; height: 62px; flex: none; border-radius: 18px; overflow: hidden;
+  width: 90px; height: 90px; flex: none; border-radius: 26px; overflow: hidden;
   display: grid; place-items: center; background: linear-gradient(160deg, #d07e44, var(--accent));
-  color: #fffaf4; font-family: Lora, serif; font-size: 25px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(198,113,57,.30); border: 1px solid rgba(255,255,255,.6);
+  color: #fffaf4; font-family: Lora, serif; font-size: 36px; font-weight: 700;
+  box-shadow: 0 6px 20px rgba(198,113,57,.35); border: 2px solid rgba(255,255,255,.8);
+  margin-bottom: 4px;
 }
 .report-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.report-title { font-size: 27px; }
-.report-meta { text-align: right; margin-left: auto; font-size: 12px; color: var(--ink-2); line-height: 1.7; }
+.report-title { font-size: 28px; line-height: 1.2; }
+.report-meta { text-align: center; font-size: 12px; color: var(--ink-2); line-height: 1.7; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
 .report-body { padding: 28px 38px 34px; display: flex; flex-direction: column; gap: 28px; }
 .report-sec-title {
   font-family: Lora, serif; font-size: 17px; font-weight: 600; margin-bottom: 12px;
@@ -740,32 +741,38 @@ select.input { cursor: pointer; appearance: none;
 }
 
 @media print {
-  @page { margin: 14mm; }
-  body { background: #fff; font-size: 11px; }
+  @page { margin: 10mm; size: A4 portrait; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  body { background: #fdfaf6 !important; font-size: 11px; }
   body::before { display: none; }
-  .sidebar, .tabbar, .mobile-bar, .no-print, .backdrop { display: none !important; }
+  .sidebar, .tabbar, .mobile-bar, .no-print, .backdrop, #toast, .confetti-wrap { display: none !important; }
   .main { padding: 0 !important; }
-  .report-doc { box-shadow: none; border: 0; border-radius: 0; max-width: none; }
-  .report-head { background: #fff; border-bottom: 2px solid #241f1b; padding: 0 0 16px; }
-  .report-body { padding: 20px 0 0; gap: 20px; }
-  .report-foot { background: #fff; padding: 14px 0 0; }
-  .stat, .sheet, .panel { box-shadow: none !important; border: 1px solid #ddd !important;
-    background: #fff !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-  .tbl { font-size: 10px; }
-  .tbl th, .tbl td { padding: 6px 8px; }
-  /* Always the real table on paper, whatever the screen width was. */
+  .report-doc { box-shadow: none; border: 1px solid rgba(198,113,57,.25); border-radius: 16px; max-width: 100%; overflow: visible; background: #fffefc; }
+  .report-head { background: linear-gradient(160deg, #fdf4ea, #f8ebdb) !important; border-bottom: 2px solid rgba(198,113,57,.3); padding: 24px 30px 18px; }
+  .report-logo { width: 80px; height: 80px; font-size: 32px; box-shadow: none; }
+  .report-body { padding: 20px 30px 24px; gap: 22px; }
+  .report-foot { background: #f8f2e9 !important; padding: 14px 30px 18px; border-top: 1px solid rgba(198,113,57,.2); }
+  .stat { border: 1px solid rgba(198,113,57,.2) !important; background: #fffdfa !important; }
+  .stat-sage { background: #f3f6ee !important; border-color: rgba(111,129,88,.3) !important; }
+  .stat-accent { background: #fdf2e8 !important; border-color: rgba(198,113,57,.3) !important; }
+  .badge-paid { background: #eaf1e3 !important; color: #435b2e !important; }
+  .badge-partial { background: #fdf4e3 !important; color: #93701f !important; }
+  .badge-unpaid { background: #fae4d2 !important; color: #9c4511 !important; }
+  .badge-overdue { background: #fce8e2 !important; color: #a92c10 !important; }
+  .tbl { font-size: 10.5px; }
+  .tbl th, .tbl td { padding: 7px 9px; }
   .tbl-flex, .tbl-flex tbody, .tbl-flex tr, .tbl-flex td { display: revert; width: auto; }
   .tbl-flex { display: table; width: 100%; }
   .tbl-flex thead { display: table-header-group; position: static; width: auto; height: auto; clip: auto; }
-  .tbl-flex tr { display: table-row; padding: 0; margin: 0; background: none; border: 0; }
-  .tbl-flex td { display: table-cell; padding: 6px 8px; border-bottom: 1px solid #eee; }
+  .tbl-flex tr { display: table-row; padding: 0; margin: 0; background: none; }
+  .tbl-flex td { display: table-cell; padding: 7px 9px; border-bottom: 1px solid #f0e6da; }
   .tbl-flex td::before { display: none; }
   .tbl-flex td.r { text-align: right !important; }
   .tbl-flex td.c { text-align: center !important; }
   .rowin, .report-sec { animation: none !important; opacity: 1 !important; transform: none !important; }
   .bar::after, .rip { display: none !important; }
   .report-sec { break-inside: avoid; page-break-inside: avoid; }
-  .tbl tbody tr { break-inside: avoid; }
+  .tbl tbody tr { break-inside: avoid; page-break-inside: avoid; }
 }
 
 /* ── responsive ───────────────────────────────────────────────────── */
@@ -912,7 +919,7 @@ select.input { cursor: pointer; appearance: none;
       { id: 'p4', customerId: 'c6', amount: 6, date: '2026-08-30', note: 'EVC Plus' },
       { id: 'p5', customerId: 'c3', amount: 5, date: '2026-07-28', note: 'Cash' }
     ];
-    return { customers: C, records: R, payments: P, foods: [] };
+    return { customers: C, records: R, payments: P, foods: CHIPS.slice() };
   }
 
   function loadData() {
@@ -924,7 +931,7 @@ select.input { cursor: pointer; appearance: none;
           // tolerate books written before due dates existed
           d.records = d.records.map(r => Object.assign({ dueDate: '', dueTime: '', note: '' }, r));
           d.payments = d.payments || [];
-          d.foods = Array.isArray(d.foods) ? d.foods : [];
+          d.foods = Array.isArray(d.foods) && d.foods.length > 0 ? d.foods : CHIPS.slice();
           return d;
         }
       }
@@ -1100,10 +1107,10 @@ select.input { cursor: pointer; appearance: none;
     'English': 'Ingiriisi', 'Somali': 'Soomaali'
   };
 
-  /* Quick-pick foods: whatever staff typed most recently, then the staples. */
+  /* Quick-pick foods: whatever staff customized, or default staples. */
   const foodList = () => {
-    const mine = (S.data.foods || []).slice().reverse();
-    return mine.concat(CHIPS.filter(c => !mine.some(m => m.toLowerCase() === c.toLowerCase())));
+    if (S.data.foods && S.data.foods.length > 0) return S.data.foods;
+    return CHIPS;
   };
 
   const isSo = () => true;
@@ -1512,7 +1519,8 @@ select.input { cursor: pointer; appearance: none;
     calendar: '<rect x="3.5" y="5" width="17" height="16" rx="3.5"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/>',
     whatsapp: '<path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/>',
     copy:   '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-    zap:    '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'
+    zap:    '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>'
   };
   const ic = (name, size, sw) =>
     '<svg width="' + (size || 18) + '" height="' + (size || 18) + '" viewBox="0 0 24 24" fill="none" ' +
@@ -2227,12 +2235,12 @@ select.input { cursor: pointer; appearance: none;
       '<div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; ' +
         'margin:0 auto 16px; max-width:1000px">' +
         '<div style="margin-right:auto"><h1>' + t('Monthly Report') + '</h1>' +
-          '<p class="sub">' + t('A statement of the book, ready to print or hand to the owner.') + '</p></div>' +
+          '<p class="sub">Warbixinta buugga oo midabaysan oo toos PDF looga soo dejisan karo.</p></div>' +
         '<select id="monthSelect" class="input" style="width:auto; min-width:180px" aria-label="' + t('Select report month') + '">' +
           keys.map(k => '<option value="' + k + '"' + (k === monthKey ? ' selected' : '') + '>' +
             monthName(k) + '</option>').join('') +
         '</select>' +
-        '<button class="btn btn-primary" data-act="print">' + ic('print', 16, 2) + t('Print / Save PDF') + '</button>' +
+        '<button class="btn btn-primary" data-act="print">' + ic('download', 16, 2.2) + 'Degso Warbixinta (PDF Midab leh)</button>' +
       '</div>';
 
     const summaryRow = (label, value, strong) =>
@@ -2244,15 +2252,15 @@ select.input { cursor: pointer; appearance: none;
 
         '<header class="report-head">' +
           logoMark('report-logo') +
-          '<div style="min-width:0">' +
+          '<div style="min-width:0; max-width:600px">' +
             '<div class="eyebrow" style="color:var(--accent-700); margin-bottom:3px">' + t('Statement') + '</div>' +
             '<h2 class="report-title">' + esc(S.profile.name || 'Sahafi Restaurant') + '</h2>' +
-            '<p class="sub" style="font-size:13px">' + t('Monthly Rent Book Statement') + ' · ' + esc(mLabel) + '</p>' +
-            (S.profile.phone ? '<p class="muted-3" style="font-size:12px">' + esc(S.profile.phone) + '</p>' : '') +
+            '<p class="sub" style="font-size:13.5px; margin-top:2px">' + t('Monthly Rent Book Statement') + ' · ' + esc(mLabel) + '</p>' +
+            (S.profile.phone ? '<p style="font-size:13px; font-weight:500; color:var(--accent-700); margin-top:3px">' + esc(S.profile.phone) + '</p>' : '') +
           '</div>' +
           '<div class="report-meta">' +
-            '<div><span class="muted-3">' + t('Reporting period') + '</span><br><strong style="font-weight:600">' + esc(mLabel) + '</strong></div>' +
-            '<div><span class="muted-3">' + t('Generated') + '</span><br>' +
+            '<div><span class="muted-3">' + t('Reporting period') + ':</span> <strong style="font-weight:600">' + esc(mLabel) + '</strong></div>' +
+            '<div><span class="muted-3">' + t('Generated') + ':</span> ' +
               dateLong(today()) + ' · ' +
               timeLabel(String(new Date().getHours()).padStart(2, '0') + ':' +
                         String(new Date().getMinutes()).padStart(2, '0')) + '</div>' +
@@ -2456,37 +2464,27 @@ select.input { cursor: pointer; appearance: none;
       /* ── food / menu manager ───────────────────────────────────── */
       '<section class="sheet sheet-pad" style="margin-bottom:14px">' +
         '<div class="section-head"><h3>' + t('Your foods') + '</h3></div>' +
-        '<p class="sub" style="font-size:12.5px; margin-bottom:14px">Cuntada liiska ku jirta ayaa si degdeg ah loo doortan karaa markaad diiwaan cusub qoreyso. Kuwa calaamadda-dashed waa kuwii aad ku daray.</p>' +
+        '<p class="sub" style="font-size:12.5px; margin-bottom:14px">Halkan waxaad ku dari kartaa ama kaga saari kartaa cuntooyinka iyo cabitaannada menu-gaaga.</p>' +
 
         /* add new food input */
-        '<div style="display:flex; gap:9px; margin-bottom:14px">' +
-          '<input id="newFoodInput" class="input" placeholder="Ku dar cunto cusub…" style="flex:1" autocomplete="off">' +
+        '<div style="display:flex; gap:9px; margin-bottom:16px">' +
+          '<input id="newFoodInput" class="input" placeholder="Qor magaca cuntada cusub…" style="flex:1" autocomplete="off">' +
           '<button class="btn btn-primary btn-sm" data-act="addFood">' + ic('plus', 15, 2.2) + 'Ku dar</button>' +
         '</div>' +
 
-        /* custom foods (deletable) */
-        ((S.data.foods || []).length
-          ? '<div style="margin-bottom:12px">' +
-              '<div class="eyebrow" style="margin-bottom:8px">Cuntooyinkaaga</div>' +
-              '<div style="display:flex; flex-wrap:wrap; gap:7px">' +
+        /* all foods in current menu (each with delete icon) */
+        '<div>' +
+          '<div class="eyebrow" style="margin-bottom:8px">Liiska Cuntooyinka (' + (S.data.foods || []).length + ')</div>' +
+          ((S.data.foods || []).length
+            ? '<div style="display:flex; flex-wrap:wrap; gap:8px">' +
                 (S.data.foods || []).map(f =>
-                  '<div style="display:inline-flex; align-items:center; gap:5px; padding:5px 10px 5px 13px; border-radius:999px; background:var(--accent-100); border:1px dashed var(--accent-200); font-size:12.5px">' +
+                  '<div style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px 6px 14px; border-radius:999px; background:var(--accent-100); border:1px solid var(--accent-200); font-size:13px; font-weight:500">' +
                     esc(f) +
-                    '<button class="icon-btn danger" data-act="deleteFood" data-food="' + esc(f) + '" aria-label="Ka saar ' + esc(f) + '" style="width:22px; height:22px; border-radius:7px; border:0; background:transparent; flex:none">' + ic('close', 11, 2.4) + '</button>' +
+                    '<button class="icon-btn danger" data-act="deleteFood" data-food="' + esc(f) + '" aria-label="Ka saar ' + esc(f) + '" style="width:22px; height:22px; border-radius:999px; border:0; background:rgba(198,113,57,.15); color:var(--danger-700); flex:none; display:grid; place-items:center; padding:0">' + ic('close', 11, 2.4) + '</button>' +
                   '</div>'
                 ).join('') +
-              '</div>' +
-            '</div>'
-          : '') +
-
-        /* built-in staples */
-        '<div>' +
-          '<div class="eyebrow" style="margin-bottom:8px">Cuntooyinka caadiga ah</div>' +
-          '<div style="display:flex; flex-wrap:wrap; gap:7px">' +
-            CHIPS.map(f =>
-              '<span style="padding:5px 13px; border-radius:999px; background:var(--solid-2); border:1px solid var(--glass-edge); font-size:12.5px; color:var(--ink-2)">' + esc(f) + '</span>'
-            ).join('') +
-          '</div>' +
+              '</div>'
+            : '<p class="sub" style="font-size:12px; font-style:italic">Weli cunto kuma jirto. Ku dar cuntadaada kore.</p>') +
         '</div>' +
       '</section>' +
 
@@ -2905,9 +2903,11 @@ select.input { cursor: pointer; appearance: none;
 
     deleteFood: (el) => {
       const food = el.dataset.food;
+      const current = (S.data.foods && S.data.foods.length > 0) ? S.data.foods : CHIPS.slice();
       commit(Object.assign({}, S.data, {
-        foods: (S.data.foods || []).filter(f => f !== food)
+        foods: current.filter(f => f.toLowerCase() !== food.toLowerCase())
       }));
+      vibrate(12);
       toast(t('Remove food'));
     }
   };
