@@ -162,11 +162,11 @@ p  { margin: 0; }
 
 /* ── buttons ──────────────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  font-family: Poppins, sans-serif; font-size: 13.5px; font-weight: 500;
-  line-height: 1.2; padding: 10px 18px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: Poppins, sans-serif; font-size: 13px; font-weight: 600;
+  line-height: 1; padding: 8px 14px; border-radius: 999px; min-height: 36px;
   border: 1px solid transparent; background: transparent; color: var(--ink);
-  cursor: pointer; text-decoration: none; white-space: nowrap;
+  cursor: pointer; text-decoration: none; white-space: nowrap; box-sizing: border-box;
   transition: background .18s var(--ease), border-color .18s var(--ease),
               transform .18s var(--ease), box-shadow .18s var(--ease), color .18s var(--ease);
 }
@@ -174,7 +174,7 @@ p  { margin: 0; }
 /* Controls sit in wrapping flex rows; without this they shrink below their
    own label and the text is clipped rather than the row wrapping. */
 .btn, .seg-opt, .chip, .icon-btn, .lang-opt { flex-shrink: 0; }
-.btn svg { display: block; flex: none; }
+.btn svg { display: inline-block; flex: none; vertical-align: middle; }
 
 .btn-primary {
   background: linear-gradient(180deg, #d07e44, var(--accent));
@@ -183,22 +183,39 @@ p  { margin: 0; }
 .btn-primary:hover { background: linear-gradient(180deg, var(--accent), var(--accent-600)); }
 
 .btn-glass {
-  background: rgba(255,255,255,.58); border-color: var(--glass-line);
+  background: rgba(255,255,255,.65); border-color: var(--glass-line);
   -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
   box-shadow: var(--sh-sm); color: var(--ink);
 }
-.btn-glass:hover { background: rgba(255,255,255,.82); }
+.btn-glass:hover { background: rgba(255,255,255,.9); }
+.btn-glass.danger { color: var(--danger-700); }
+.btn-glass.danger:hover { background: var(--danger-100); border-color: var(--danger-200); }
 
-.btn-quiet { color: var(--accent-700); padding: 8px 12px; font-weight: 500; }
+.btn-quiet { color: var(--accent-700); padding: 6px 10px; font-weight: 500; min-height: 30px; }
 .btn-quiet:hover { background: rgba(198,113,57,.10); }
 
-.btn-sm { padding: 7px 14px; font-size: 12.5px; }
+.btn-sm { padding: 6px 11px; font-size: 12px; min-height: 32px; gap: 5px; }
 .btn-block { width: 100%; }
 
+.btn-whatsapp {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  background: #25D366; color: #ffffff !important; border-radius: 999px;
+  font-family: Poppins, sans-serif; font-size: 12px; font-weight: 600;
+  padding: 6px 11px; min-height: 32px; border: 0; box-shadow: 0 2px 6px rgba(37,211,102,.3);
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease), filter .14s var(--ease);
+}
+.btn-whatsapp:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-whatsapp:active { transform: scale(.97); }
+
+.btn-danger {
+  background: var(--danger-100); color: var(--danger-700); border: 1px solid var(--danger-200);
+}
+.btn-danger:hover { background: var(--danger); color: #fff; }
+
 .icon-btn {
-  width: 34px; height: 34px; padding: 0; flex: none;
-  display: grid; place-items: center; border-radius: 12px;
-  border: 1px solid var(--glass-edge); background: rgba(255,255,255,.5);
+  width: 32px; height: 32px; padding: 0; flex: none;
+  display: grid; place-items: center; border-radius: 10px;
+  border: 1px solid var(--glass-edge); background: rgba(255,255,255,.6);
   color: var(--ink-2); cursor: pointer;
   transition: background .18s var(--ease), color .18s var(--ease),
               border-color .18s var(--ease), transform .18s var(--ease);
@@ -1972,31 +1989,37 @@ select.input { cursor: pointer; appearance: none;
     };
     const filters = [
       ['All', 'Dhammaan'],
-      ['Rukun', '⭐ Macaamiisha Rukunka'],
-      ['Caadi', 'Deymaha Caadiga ah'],
+      ['Rukun', '⭐ Rukunka (Bishii)'],
+      ['Caadi', 'Deymaha Maalinlaha'],
       ['Overdue', 'Waqtigii dhaafay'],
       ['Unpaid', 'Lama bixin'],
       ['Partially Paid', 'Qayb ahaan'],
       ['Paid in Full', 'La bixiyay']
     ];
 
+    const sortOptions = [
+      ['recent', 'Ugu Dambeeyay'],
+      ['debt', 'Haraaga Ugu Weyn'],
+      ['due', 'Xilliga Bixinta'],
+      ['name', 'Magaca A-Z']
+    ];
+
     const controls =
-      '<div style="display:flex; gap:11px; flex-wrap:wrap; align-items:center; margin-bottom:14px">' +
-        '<div class="search-wrap">' + ic('search', 16, 2.1) +
-          '<input id="custSearch" class="input" type="search" placeholder="' + t('Search by name or phone…') + '" value="' + esc(S.custSearch) + '" aria-label="' + t('Search customers') + '">' +
+      '<div style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px">' +
+        '<div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">' +
+          '<div class="search-wrap" style="flex:2; min-width:220px">' + ic('search', 16, 2.1) +
+            '<input id="custSearch" class="input" type="search" placeholder="Ka raadi magac ama taleefan…" value="' + esc(S.custSearch) + '" aria-label="' + t('Search customers') + '">' +
+          '</div>' +
+          '<div class="seg" role="group" aria-label="Kala horreysiin" style="flex-wrap:wrap">' +
+            '<span style="font-size:11px; font-weight:600; color:var(--ink-3); padding:6px 6px 6px 10px; align-self:center">Kala horree:</span>' +
+            sortOptions.map(([k, l]) => '<button class="seg-opt" data-act="setCustSort" data-sort="' + k + '" aria-pressed="' + (S.custSort === k) + '">' +
+              l + '</button>').join('') +
+          '</div>' +
         '</div>' +
         '<div class="seg" role="group" aria-label="Kala saar macaamiisha">' +
           filters.map(([f, lbl]) => '<button class="seg-opt" data-act="custFilter" data-filter="' + f + '" aria-pressed="' + (S.custFilter === f) + '">' +
-            lbl + ' <span style="opacity:.6; font-size:11px">(' + (counts[f] || 0) + ')</span></button>').join('') +
+            lbl + ' <span style="opacity:.65; font-size:11px">(' + (counts[f] || 0) + ')</span></button>').join('') +
         '</div>' +
-        '<label class="field" style="flex-direction:row; align-items:center; gap:8px">' +
-          '<span style="font-size:11.5px; color:var(--ink-2); white-space:nowrap">' + t('Sort by') + '</span>' +
-          '<select id="custSort" class="input" style="min-height:36px; width:auto" aria-label="' + t('Sort customers') + '">' +
-            [['recent', 'Most recent'], ['debt', 'Highest debt'], ['due', 'Due date'],
-             ['name', 'Name'], ['last', 'Last transaction']]
-              .map(([k, l]) => '<option value="' + k + '"' + (S.custSort === k ? ' selected' : '') + '>' + t(l) + '</option>').join('') +
-          '</select>' +
-        '</label>' +
       '</div>';
 
     if (!accs.length) {
@@ -2008,71 +2031,19 @@ select.input { cursor: pointer; appearance: none;
         '</div></section></div>';
     }
 
-    /* Expandable panel inside customer card — zero horizontal table scrolling */
-    const expandPanel = (a) =>
-      '<div style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:14px; margin-top:8px">' +
-        '<div class="grid-stats" style="margin-bottom:14px">' +
-          stat('x.' + a.id + '.consumed', 'Total consumed', a.consumed, money(a.consumed)) +
-          stat('x.' + a.id + '.paid', 'Total paid', a.paid, money(a.paid), { tone: 'sage' }) +
-          stat('x.' + a.id + '.rem', 'Remaining Haraa', a.remaining, money(a.remaining), { tone: a.remaining > 0.001 ? 'accent' : 'sage' }) +
-          stat('x.' + a.id + '.cnt', 'Transactions', a.count, String(a.count), { foot: F.stillOpen(a.openCount) }) +
-        '</div>' +
-        '<div style="display:flex; flex-direction:column; gap:12px">' +
-          '<div>' +
-            '<div class="eyebrow" style="margin-bottom:6px">Cuntooyinka La Qatay (' + a.records.length + ')</div>' +
-            (a.records.length
-              ? '<div style="display:flex; flex-direction:column; gap:6px">' +
-                  a.records.slice(0, 5).map(r =>
-                    '<div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:var(--r-sm); background:var(--solid-1); border:1px solid var(--glass-edge); font-size:12.5px">' +
-                      '<div><span style="font-weight:600">' + esc(r.food) + '</span>' +
-                        '<span class="muted-3" style="display:block; font-size:11px">' + dateLabel(r.date) + (r.note ? ' · ' + esc(r.note) : '') + '</span></div>' +
-                      '<div style="text-align:right"><span class="n" style="font-weight:600">' + money(r.total) + '</span>' +
-                        '<span style="display:block; font-size:11px; color:' + (r.total - r.paid > 0.001 ? 'var(--accent-700)' : 'var(--sage-600)') + '">' +
-                          (r.total - r.paid > 0.001 ? 'Haraa: ' + money(r.total - r.paid) : 'Dhammaystiran') + '</span></div>' +
-                    '</div>'
-                  ).join('') +
-                  (a.records.length > 5 ? '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-size:12px; margin-top:4px; text-align:center">Eeg dhammaan ' + a.records.length + ' diiwaan →</button>' : '') +
-                '</div>'
-              : '<p class="sub" style="font-size:12px">Cunto la diiwaangeliyay ma jirto.</p>') +
-          '</div>' +
-          (a.payments.length
-            ? '<div>' +
-                '<div class="eyebrow" style="margin-bottom:6px">Lacagaha La Bixiyay (' + a.payments.length + ')</div>' +
-                '<div style="display:flex; flex-direction:column; gap:5px">' +
-                  a.payments.slice(0, 3).map(p =>
-                    '<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; border-radius:var(--r-sm); background:var(--solid-1); font-size:12px">' +
-                      '<span class="muted">' + dateLabel(p.date) + ' · ' + esc(p.note || 'Cash') + '</span>' +
-                      '<span class="num" style="color:var(--sage-600); font-weight:600">+' + money(p.amount) + '</span>' +
-                    '</div>'
-                  ).join('') +
-                '</div>' +
-              '</div>'
-            : '') +
-          (a.remaining > 0.001
-            ? '<div style="padding:10px 12px; border-radius:var(--r-sm); background:' +
-                (a.nextOverdue ? 'var(--danger-100)' : 'var(--accent-100)') + '; border:1px solid ' +
-                (a.nextOverdue ? 'var(--danger-200)' : 'var(--accent-200)') + '; font-size:12.5px">' +
-                '<span style="font-weight:600; color:' + (a.nextOverdue ? 'var(--danger-700)' : 'var(--accent-700)') + '">' +
-                  (a.nextOverdue ? 'Waqtigu wuxuu dhaafay: ' : 'La filayo: ') + '</span>' +
-                dueSentence(a) +
-              '</div>'
-            : '') +
-        '</div>' +
-      '</div>';
-
     /* Build a responsive customer card that is 100% visible on ANY device without sliding */
     const renderCard = (a) => {
-      const open = S.expanded === a.id;
       const phoneClean = cleanPhone(a.phone);
       return '<div class="cust-card ' + (a.isRukun ? 'cust-card-rukun' : '') + '">' +
         '<div class="cust-card-head">' +
-          '<span class="avatar" style="width:42px; height:42px; font-size:15px">' + esc(initials(a.name)) + '</span>' +
+          '<span class="avatar" style="width:44px; height:44px; font-size:16px">' + esc(initials(a.name)) + '</span>' +
           '<div style="margin-right:auto; min-width:0">' +
-            '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-weight:700; font-size:15px; text-align:left; line-height:1.25">' + esc(a.name) + '</button>' +
+            '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-weight:700; font-size:16px; text-align:left; line-height:1.25; display:block" title="Guji si aad u aragto taariikhda">' +
+              esc(a.name) + '</button>' +
             (a.phone ? '<span style="display:block; font-size:12px; color:var(--ink-3); margin-top:2px">' + esc(a.phone) + '</span>' : '') +
             '<div style="margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap">' +
               rukunBadge(a.isRukun) +
-              '<button class="btn btn-quiet btn-sm" data-act="toggleRukun" data-id="' + a.id + '" style="font-size:11px; padding:2px 7px; height:auto; color:var(--ink-3)" title="Guji si aad u beddesho">' +
+              '<button class="btn btn-quiet btn-sm" data-act="toggleRukun" data-id="' + a.id + '" style="font-size:11px; padding:2px 7px; min-height:24px; color:var(--ink-3)" title="Beddel nooca macmiilka">' +
                 (a.isRukun ? 'Beddel: Caadi' : 'Beddel: Rukun ⭐') + '</button>' +
             '</div>' +
           '</div>' +
@@ -2082,7 +2053,7 @@ select.input { cursor: pointer; appearance: none;
         /* 3-metric KPI strip */
         '<div class="cust-card-stats">' +
           '<div>' +
-            '<div class="cust-card-stat-label">La Cunay</div>' +
+            '<div class="cust-card-stat-label">Wadarta</div>' +
             '<div class="cust-card-stat-val">' + money(a.consumed) + '</div>' +
           '</div>' +
           '<div>' +
@@ -2098,18 +2069,24 @@ select.input { cursor: pointer; appearance: none;
         (a.next ? '<div style="font-size:12px; ' + (a.nextOverdue ? 'color:var(--danger-700); font-weight:600' : 'color:var(--ink-2)') + '">' +
           (a.nextOverdue ? '⚠️ Waqtigu Dhaafay: ' : '📅 La filayo: ') + dateLong(a.next.dueDate) + (a.next.dueTime ? ' · ' + timeLabel(a.next.dueTime) : '') + '</div>' : '') +
 
-        /* Full action button bar — ALL ACTIONS ALWAYS VISIBLE WITH ZERO SLIDING */
-        '<div class="cust-card-actions">' +
-          (a.remaining > 0.001 ? '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '">' + ic('card', 14, 2) + t('Pay') + '</button>' : '') +
-          (a.phone && a.remaining > 0.001 ? '<a href="https://wa.me/' + phoneClean + '?text=' + encodeURIComponent('Asc ' + a.name + ', waxaan kaa soo xasuusinaynaa haraagaaga ' + money(a.remaining) + ' ee ' + (S.profile.name || 'Sahafi') + '.') + '" target="_blank" rel="noopener" class="btn-whatsapp btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px">' + ic('whatsapp', 13, 2) + 'WhatsApp</a>' : '') +
-          '<button class="btn btn-glass btn-sm" data-act="openAddFor" data-id="' + a.id + '" title="' + t('Add food') + '">' + ic('plus', 13, 2) + 'Cunto</button>' +
-          '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '">' + ic('user', 13, 2) + 'Eeg</button>' +
-          '<button class="btn btn-glass btn-sm danger" data-act="deleteCustomer" data-id="' + a.id + '" title="Tirtir Macmiilka">' + ic('trash', 13, 2) + 'Tirtir</button>' +
-          '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '" style="margin-left:auto">' +
-            '<span style="display:block; transition:transform .18s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
-        '</div>' +
+        /* Clean quick recent items summary */
+        (a.records.length
+          ? '<div style="font-size:12px; color:var(--ink-3); background:var(--solid-2); padding:6px 10px; border-radius:var(--r-sm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">' +
+              '<span>Cuntooyinkii: </span><strong style="color:var(--ink-2)">' + esc(a.records.slice(-2).map(r => r.food).join(', ')) + '</strong>' +
+            '</div>'
+          : '') +
 
-        (open ? expandPanel(a) : '') +
+        /* Full action button bar — ALL BUTTONS PERFECTLY FIT WITH ZERO CLIPPING */
+        '<div class="cust-card-actions">' +
+          (a.remaining > 0.001
+            ? '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '">' + ic('card', 14, 2) + 'Bixi</button>' +
+              '<button class="btn btn-glass btn-sm" data-act="settleFullDebt" data-id="' + a.id + '" title="Hal mar wada xidh haraaga">' + ic('check', 13, 2) + 'Wada Bixi</button>'
+            : '<span class="badge badge-paid" style="font-size:11.5px">' + ic('check', 12, 2.2) + 'Dhammaystiran</span>') +
+          (a.phone && a.remaining > 0.001 ? '<a href="https://wa.me/' + phoneClean + '?text=' + encodeURIComponent('Asc ' + a.name + ', waxaan kaa soo xasuusinaynaa haraagaaga ' + money(a.remaining) + ' ee ' + (S.profile.name || 'Sahafi') + '.') + '" target="_blank" rel="noopener" class="btn-whatsapp btn-sm" style="text-decoration:none">' + ic('whatsapp', 13, 2) + 'WhatsApp</a>' : '') +
+          '<button class="btn btn-glass btn-sm" data-act="openAddFor" data-id="' + a.id + '" title="' + t('Add food') + '">' + ic('plus', 13, 2) + '+ Cunto</button>' +
+          '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '" title="Eeg Taariikhda Buuxda">' + ic('user', 13, 2) + 'Eeg</button>' +
+          '<button class="btn btn-glass btn-sm danger" data-act="deleteCustomer" data-id="' + a.id + '" title="Tirtir Macmiilka" style="margin-left:auto">' + ic('trash', 13, 2) + 'Tirtir</button>' +
+        '</div>' +
       '</div>';
     };
 
@@ -3024,6 +3001,25 @@ select.input { cursor: pointer; appearance: none;
 
     filter: (el) => { S.filter = el.dataset.filter; render(); },
     custFilter: (el) => { S.custFilter = el.dataset.filter; render(); },
+    setCustSort: (el) => { S.custSort = el.dataset.sort; render(); },
+    settleFullDebt: (el) => {
+      const id = el.dataset.id;
+      const cust = custOf(id);
+      if (!cust) return;
+      const acc = account(cust);
+      if (acc.remaining <= 0.001) { toast('Macmiilkan ma laha wax haraa ah'); return; }
+      if (!confirm(`Ma hubtaa inaad hal mar wada xidho haraaga ${cust.name} oo dhan ${money(acc.remaining)}?`)) return;
+
+      const tDate = today();
+      const records = S.data.records.map(r => r.customerId === id ? Object.assign({}, r, { paid: r.total }) : r);
+      const payments = S.data.payments.concat([{
+        id: 'p' + Date.now(), customerId: id, amount: acc.remaining, date: tDate, note: 'Bixiyay Dhammaan'
+      }]);
+      commit(Object.assign({}, S.data, { records, payments }));
+      vibrate([30, 50, 40]);
+      launchConfetti();
+      toast(`🎉 Haraaga ${cust.name} (${money(acc.remaining)}) gabi ahaanba waa la bixiyay!`);
+    },
     setRukun: (el) => {
       S.form = Object.assign({}, S.form, { isRukun: el.dataset.val === '1' });
       // If editing customer name already exists, update their type too
