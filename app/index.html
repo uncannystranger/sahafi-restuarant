@@ -305,23 +305,23 @@ select.input { cursor: pointer; appearance: none;
 }
 
 .seg {
-  display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px;
+  display: inline-flex; flex-wrap: wrap; padding: 4px; gap: 4px; border-radius: 999px;
   background: rgba(255,255,255,.55); border: 1px solid var(--glass-line);
   -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
-  box-shadow: var(--sh-sm);
+  box-shadow: var(--sh-sm); max-width: 100%;
 }
 .seg-opt {
   padding: 6px 14px; border: 0; border-radius: 999px; background: transparent;
   font-family: Poppins, sans-serif; font-size: 12.5px; font-weight: 500;
   color: var(--ink-2); cursor: pointer; white-space: nowrap;
-  transition: background .2s var(--ease), color .2s var(--ease), box-shadow .2s var(--ease);
+  transition: background .12s var(--ease), color .12s var(--ease);
 }
 .seg-opt:hover { color: var(--ink); background: rgba(255,255,255,.7); }
 .seg-opt[aria-pressed="true"] {
   background: var(--solid); color: var(--ink); font-weight: 600; box-shadow: var(--sh-sm);
 }
 
-.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
 .search-wrap svg { position: absolute; left: 14px; top: 12px; pointer-events: none; color: var(--ink-3); }
 .search-wrap .input { padding-left: 40px; }
 
@@ -338,20 +338,22 @@ select.input { cursor: pointer; appearance: none;
 .badge-unpaid  { background: var(--accent-100); color: var(--accent-700); border-color: var(--accent-200); }
 .badge-overdue { background: var(--danger-100); color: var(--danger-700); border-color: var(--danger-200); }
 .badge-none    { background: var(--solid-2);    color: var(--ink-3);      border-color: var(--glass-edge); }
+.badge-rukun   { background: #ede7fb;           color: #5c35b5;           border-color: #d8cbf5; font-weight: 600; }
+.badge-caadi   { background: #f2ede7;           color: #63584e;           border-color: #e2dad1; }
 
-/* ── tables ───────────────────────────────────────────────────────── */
-.tbl-scroll { overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
-.tbl { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 13px; }
+/* ── tables & responsive containers (Zero-Sliding) ───────────────── */
+.tbl-scroll { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
 .tbl th {
-  text-align: left; padding: 9px 12px; white-space: nowrap;
+  text-align: left; padding: 9px 10px; white-space: nowrap;
   font-family: Poppins, sans-serif; font-size: 10.5px; font-weight: 600;
   letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
   border-bottom: 1px solid var(--glass-edge);
 }
 .tbl td {
-  padding: 11px 12px; border-bottom: 1px solid rgba(96,74,48,.07); vertical-align: middle;
+  padding: 10px 10px; border-bottom: 1px solid rgba(96,74,48,.07); vertical-align: middle;
 }
-.tbl tbody tr { transition: background .16s var(--ease); }
+.tbl tbody tr { transition: background .12s var(--ease); }
 .tbl tbody tr:hover { background: rgba(198,113,57,.05); }
 .tbl tbody tr:last-child td { border-bottom: 0; }
 .tbl .r { text-align: right; }
@@ -375,23 +377,26 @@ select.input { cursor: pointer; appearance: none;
 .linkish:hover { color: var(--accent-700); }
 
 /* ── progress ─────────────────────────────────────────────────────── */
-.bar { height: 7px; border-radius: 999px; background: rgba(96,74,48,.12); overflow: hidden; }
-.bar > i { display: block; height: 100%; border-radius: 999px; width: 0;
-  transition: width .9s var(--ease); }
+.bar {
+  height: 6px; width: 100%; border-radius: 999px; background: rgba(96,74,48,.09);
+  overflow: hidden; display: flex;
+}
+.bar > i { height: 100%; border-radius: 999px; display: block;
+  transition: width .35s var(--ease); }
 .bar-accent > i { background: linear-gradient(90deg, #d9884b, var(--accent)); }
 .bar-sage   > i { background: linear-gradient(90deg, #86995f, var(--sage)); }
 
 /* ── stat cards ───────────────────────────────────────────────────── */
 .stat {
-  padding: 17px 19px; border-radius: var(--r-lg);
+  padding: 16px 18px; border-radius: var(--r-lg);
   background: var(--glass-strong);
   -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
   border: 1px solid var(--glass-line); box-shadow: var(--sh-sm);
   display: flex; flex-direction: column; gap: 3px; min-width: 0;
-  transition: box-shadow .25s var(--ease), transform .25s var(--ease);
+  transition: transform .15s var(--ease);
 }
 .stat:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
-.stat .v { font-size: 27px; line-height: 1.15; }
+.stat .v { font-size: 26px; line-height: 1.15; }
 .stat .foot { font-size: 11.5px; color: var(--ink-3); }
 .stat-accent { background: linear-gradient(165deg, #fdf1e7, #fbe6d5); border-color: rgba(255,255,255,.8); }
 .stat-accent .v { color: var(--accent-700); }
@@ -408,9 +413,9 @@ select.input { cursor: pointer; appearance: none;
 .mini .k { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; flex: none; }
 
 /* ── animation ────────────────────────────────────────────────────── */
-@keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pop  { 0% { transform: scale(1); } 40% { transform: scale(1.11); } 100% { transform: scale(1); } }
+@keyframes pop  { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
 @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(176,68,41,.30); } 100% { box-shadow: 0 0 0 9px rgba(176,68,41,0); } }
 
 .anim-rise  { animation: rise .34s var(--ease) both; }
@@ -806,8 +811,7 @@ select.input { cursor: pointer; appearance: none;
   .stat { padding: 14px 15px; }
   .stat .v { font-size: 23px; }
   .search-wrap { min-width: 100%; }
-  .seg { width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .seg::-webkit-scrollbar { display: none; }
+  .seg { width: 100%; overflow: visible; flex-wrap: wrap; gap: 5px; }
   .page-head .btn { flex: 1 1 auto; }
 }
 
@@ -880,14 +884,14 @@ select.input { cursor: pointer; appearance: none;
   /* ══ seed ═══════════════════════════════════════════════════════ */
   function seed() {
     const C = [
-      { id: 'c1', name: 'Ahmed Nuur',       phone: '+252 61 234 5567' },
-      { id: 'c2', name: 'Faadumo Cali',     phone: '+252 61 887 2210' },
-      { id: 'c3', name: 'Cabdi Warsame',    phone: '+252 63 445 9080' },
-      { id: 'c4', name: 'Hodan Ismaaciil',  phone: '+252 61 300 4412' },
-      { id: 'c5', name: 'Yuusuf Maxamed',   phone: '+252 61 774 1188' },
-      { id: 'c6', name: 'Sagal Xasan',      phone: '+252 62 119 6733' },
-      { id: 'c7', name: 'Liibaan Cabdulle', phone: '+252 61 552 0491' },
-      { id: 'c8', name: 'Nasteexo Jaamac',  phone: '+252 61 908 3376' }
+      { id: 'c1', name: 'Ahmed Nuur',       phone: '+252 61 234 5567', isRukun: true },
+      { id: 'c2', name: 'Faadumo Cali',     phone: '+252 61 887 2210', isRukun: false },
+      { id: 'c3', name: 'Cabdi Warsame',    phone: '+252 63 445 9080', isRukun: true },
+      { id: 'c4', name: 'Hodan Ismaaciil',  phone: '+252 61 300 4412', isRukun: false },
+      { id: 'c5', name: 'Yuusuf Maxamed',   phone: '+252 61 774 1188', isRukun: true },
+      { id: 'c6', name: 'Sagal Xasan',      phone: '+252 62 119 6733', isRukun: false },
+      { id: 'c7', name: 'Liibaan Cabdulle', phone: '+252 61 552 0491', isRukun: true },
+      { id: 'c8', name: 'Nasteexo Jaamac',  phone: '+252 61 908 3376', isRukun: false }
     ];
     const r = (id, c, food, total, paid, date, dueDate, dueTime, note) =>
       ({ id, customerId: c, food, total, paid, date,
@@ -930,6 +934,7 @@ select.input { cursor: pointer; appearance: none;
         if (d && d.customers && d.records) {
           // tolerate books written before due dates existed
           d.records = d.records.map(r => Object.assign({ dueDate: '', dueTime: '', note: '' }, r));
+          d.customers = d.customers.map((c, i) => Object.assign({ isRukun: i % 2 === 0 }, c));
           d.payments = d.payments || [];
           d.foods = Array.isArray(d.foods) && d.foods.length > 0 ? d.foods : CHIPS.slice();
           return d;
@@ -951,7 +956,7 @@ select.input { cursor: pointer; appearance: none;
   /* ══ state ══════════════════════════════════════════════════════ */
   const S = {
     screen: 'dashboard', customerId: null, dialog: null, editId: null, payCustomerId: null,
-    form: { name: '', phone: '', food: '', total: '', paid: '', dueDate: '', dueTime: '', note: '' },
+    form: { name: '', phone: '', food: '', total: '', paid: '', dueDate: '', dueTime: '', note: '', isRukun: false },
     payAmount: '', payNote: 'Cash',
     search: '', filter: 'All',
     custSearch: '', custFilter: 'All', custSort: 'recent', expanded: null,
@@ -1283,6 +1288,10 @@ select.input { cursor: pointer; appearance: none;
     '<span class="badge ' + (BADGE[status] || 'badge-unpaid') + (extraClass ? ' ' + extraClass : '') +
     '"><i class="dot"></i>' + t(status) + '</span>';
 
+  const rukunBadge = (isRukun) => isRukun
+    ? '<span class="badge badge-rukun"><i class="dot"></i>⭐ Rukun (Bishii)</span>'
+    : '<span class="badge badge-caadi"><i class="dot"></i>Deyn Maalinle</span>';
+
   /* ══ fast indexes & memoization ═════════════════════════════════ */
   let _custMap = new Map();
   let _accCache = null;
@@ -1320,7 +1329,7 @@ select.input { cursor: pointer; appearance: none;
     const dated = open.filter(r => r.dueDate).sort((a, b) => dueMs(a) - dueMs(b));
     const next = dated[0] || null;
     return {
-      c, id: c.id, name: c.name, phone: c.phone, records: rs, payments: pays,
+      c, id: c.id, name: c.name, phone: c.phone, isRukun: !!c.isRukun, records: rs, payments: pays,
       consumed, paid, remaining, status,
       count: rs.length, openCount: open.length, overdueCount: overdue.length,
       next, nextDue: next ? next.dueDate : '', nextTime: next ? next.dueTime : '',
@@ -1421,7 +1430,7 @@ select.input { cursor: pointer; appearance: none;
     };
     let cust = data.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
     if (!cust) {
-      cust = { id: 'c' + Date.now(), name, phone: f.phone.trim() };
+      cust = { id: 'c' + Date.now(), name, phone: f.phone.trim(), isRukun: !!f.isRukun };
       data.customers.push(cust);
     } else if (f.phone.trim() && f.phone.trim() !== cust.phone) {
       data.customers = data.customers.map(c =>
@@ -1560,7 +1569,7 @@ select.input { cursor: pointer; appearance: none;
       const post = text.slice(digits.index + digits[0].length);
       const dec = (digits[0].split('.')[1] || '').length;
       const t0 = performance.now();
-      const dur = 620;
+      const dur = 140;
       const step = (t) => {
         const p = Math.min(1, (t - t0) / dur);
         const e = 1 - Math.pow(1 - p, 3);
@@ -1883,7 +1892,7 @@ select.input { cursor: pointer; appearance: none;
     return '<div class="wrap anim-fade">' +
       '<div class="page-head">' +
         '<div style="margin-right:auto"><h1>' + t('Rent Book') + '</h1>' +
-          '<p class="sub">' + t('Every plate served on credit, when it is due, and what came back.') + '</p></div>' +
+          '<p class="sub">Diiwaanka cuntooyinka iyo deynta maalinlaha ah ee la qaatay.</p></div>' +
         '<button class="btn btn-primary" data-act="openAdd">' + ic('plus', 16, 2.2) + t('Add Record') + '</button>' +
       '</div>' + controls +
       '<section class="sheet" style="padding:6px 18px 10px">' + body + '</section>' +
@@ -1895,10 +1904,11 @@ select.input { cursor: pointer; appearance: none;
     const q = S.custSearch.trim().toLowerCase();
     let accs = accounts();
     if (q) accs = accs.filter(a => a.name.toLowerCase().includes(q) || (a.phone || '').includes(q));
-    if (S.custFilter !== 'All') accs = accs.filter(a => a.status === S.custFilter);
+    if (S.custFilter === 'Rukun') accs = accs.filter(a => a.isRukun);
+    else if (S.custFilter === 'Caadi') accs = accs.filter(a => !a.isRukun);
+    else if (S.custFilter !== 'All') accs = accs.filter(a => a.status === S.custFilter);
 
     const SORTS = {
-      // Newest activity first — the record just written is at the top.
       recent: (a, b) => (b.lastStamp || '').localeCompare(a.lastStamp || '') || a.name.localeCompare(b.name),
       debt: (a, b) => b.remaining - a.remaining || a.name.localeCompare(b.name),
       due:  (a, b) => {
@@ -1914,21 +1924,31 @@ select.input { cursor: pointer; appearance: none;
     const all = accounts();
     const counts = {
       All: all.length,
+      'Rukun': all.filter(a => a.isRukun).length,
+      'Caadi': all.filter(a => !a.isRukun).length,
       'Overdue': all.filter(a => a.status === 'Overdue').length,
       'Unpaid': all.filter(a => a.status === 'Unpaid').length,
       'Partially Paid': all.filter(a => a.status === 'Partially Paid').length,
       'Paid in Full': all.filter(a => a.status === 'Paid in Full').length
     };
-    const filters = ['All', 'Overdue', 'Unpaid', 'Partially Paid', 'Paid in Full'];
+    const filters = [
+      ['All', 'Dhammaan'],
+      ['Rukun', '⭐ Macaamiisha Rukunka'],
+      ['Caadi', 'Deymaha Caadiga ah'],
+      ['Overdue', 'Waqtigii dhaafay'],
+      ['Unpaid', 'Lama bixin'],
+      ['Partially Paid', 'Qayb ahaan'],
+      ['Paid in Full', 'La bixiyay']
+    ];
 
     const controls =
       '<div style="display:flex; gap:11px; flex-wrap:wrap; align-items:center; margin-bottom:14px">' +
         '<div class="search-wrap">' + ic('search', 16, 2.1) +
           '<input id="custSearch" class="input" type="search" placeholder="' + t('Search by name or phone…') + '" value="' + esc(S.custSearch) + '" aria-label="' + t('Search customers') + '">' +
         '</div>' +
-        '<div class="seg" role="group" aria-label="' + t('Filter by payment status') + '">' +
-          filters.map(f => '<button class="seg-opt" data-act="custFilter" data-filter="' + f + '" aria-pressed="' + (S.custFilter === f) + '">' +
-            t(f) + ' <span style="opacity:.55">' + counts[f] + '</span></button>').join('') +
+        '<div class="seg" role="group" aria-label="Kala saar macaamiisha">' +
+          filters.map(([f, lbl]) => '<button class="seg-opt" data-act="custFilter" data-filter="' + f + '" aria-pressed="' + (S.custFilter === f) + '">' +
+            lbl + ' <span style="opacity:.6; font-size:11px">(' + (counts[f] || 0) + ')</span></button>').join('') +
         '</div>' +
         '<label class="field" style="flex-direction:row; align-items:center; gap:8px">' +
           '<span style="font-size:11.5px; color:var(--ink-2); white-space:nowrap">' + t('Sort by') + '</span>' +
@@ -1949,9 +1969,9 @@ select.input { cursor: pointer; appearance: none;
         '</div></section></div>';
     }
 
-    /* Expandable panel: the whole account without leaving the table. */
+    /* Expandable panel */
     const expandPanel = (a) =>
-      '<tr class="expand-row"><td colspan="' + (v.desktop ? (v.wide ? 9 : 6) : 4) + '"><div class="expand-inner">' +
+      '<tr class="expand-row"><td colspan="' + (v.desktop ? (v.wide ? 9 : 7) : 4) + '"><div class="expand-inner">' +
         '<div class="grid-stats" style="margin-bottom:16px">' +
           stat('x.' + a.id + '.consumed', 'Total consumed', a.consumed, money(a.consumed)) +
           stat('x.' + a.id + '.paid', 'Total paid', a.paid, money(a.paid), { tone: 'sage' }) +
@@ -1977,9 +1997,9 @@ select.input { cursor: pointer; appearance: none;
             '<div class="eyebrow" style="margin-bottom:7px">' + t('Payment history') + '</div>' +
             (a.payments.length
               ? '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>' + t('Date') + '</th><th>' + t('Method') + '</th><th class="r">' + t('Amount') + '</th></tr></thead><tbody>' +
-                a.payments.map(p => '<tr><td class="muted-3">' + dateLabel(p.date) + '</td><td class="muted">' + esc(p.note) + '</td>' +
-                  '<td class="r n" style="color:var(--sage-600); font-weight:600">' + money(p.amount) + '</td></tr>').join('') +
-                '</tbody></table></div>'
+                  a.payments.map(p => '<tr><td class="muted-3">' + dateLabel(p.date) + '</td><td class="muted">' + esc(p.note) + '</td>' +
+                    '<td class="r n" style="color:var(--sage-600); font-weight:600">' + money(p.amount) + '</td></tr>').join('') +
+                  '</tbody></table></div>'
               : '<p class="sub" style="font-size:12.5px">' + t('No payments recorded yet.') + '</p>') +
             '<div style="margin-top:14px; padding:13px 15px; border-radius:var(--r-md); background:' +
               (a.nextOverdue ? 'var(--danger-100)' : 'var(--accent-100)') + '; border:1px solid ' +
@@ -1993,10 +2013,49 @@ select.input { cursor: pointer; appearance: none;
               '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '">' + t('Record payment') + '</button>' +
               '<button class="btn btn-glass btn-sm" data-act="openAddFor" data-id="' + a.id + '">' + t('Add food') + '</button>' +
               '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '">' + t('Full profile') + '</button>' +
+              '<button class="btn btn-glass btn-sm" data-act="toggleRukun" data-id="' + a.id + '" title="Beddel nooca macmiilka">' +
+                (a.isRukun ? '→ Caadi' : '→ Rukun ⭐') + '</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
       '</div></td></tr>';
+
+    /* Build a customer row (mobile card OR desktop row) */
+    const mobileCard = (a) => {
+      const open = S.expanded === a.id;
+      const phoneClean = cleanPhone(a.phone);
+      return '<div style="background:' + (a.isRukun ? 'linear-gradient(135deg,#fdfaf6,#f3ebfa)' : 'var(--solid-2)') +
+        '; border:1px solid ' + (a.isRukun ? 'rgba(92,53,181,.22)' : 'var(--glass-edge)') +
+        '; border-radius:var(--r-md); padding:13px 14px; display:flex; flex-direction:column; gap:9px">' +
+        '<div style="display:flex; align-items:flex-start; gap:10px">' +
+          '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
+          '<div style="margin-right:auto; min-width:0">' +
+            '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-weight:600; font-size:14.5px; text-align:left">' + esc(a.name) + '</button>' +
+            (a.phone ? '<span style="display:block; font-size:11.5px; color:var(--ink-3)">' + esc(a.phone) + '</span>' : '') +
+            '<div style="margin-top:4px">' + rukunBadge(a.isRukun) + '</div>' +
+          '</div>' +
+          '<span data-badgekey="c.' + a.id + '" data-badgeval="' + a.status + '">' + badge(a.status) + '</span>' +
+        '</div>' +
+
+        '<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,.7); padding:8px 12px; border-radius:var(--r-sm); font-size:12.5px">' +
+          '<span class="muted">' + t('Outstanding Haraa') + '</span>' +
+          '<span class="num" style="font-weight:700; font-size:16px; ' + (a.remaining > 0.001 ? 'color:var(--accent-700)' : 'color:var(--sage-600)') + '">' + money(a.remaining) + '</span>' +
+        '</div>' +
+
+        (a.next ? '<div style="font-size:12px; ' + (a.nextOverdue ? 'color:var(--danger-700); font-weight:500' : 'color:var(--ink-2)') + '">' +
+          (a.nextOverdue ? F.overdueSince('') : F.due('')) + dateLong(a.next.dueDate) + (a.next.dueTime ? ' — ' + timeLabel(a.next.dueTime) : '') + '</div>' : '') +
+
+        '<div style="display:flex; gap:7px; align-items:center; flex-wrap:wrap; margin-top:2px">' +
+          (a.remaining > 0.001 ? '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('card', 14, 2) + t('Pay') + '</button>' : '') +
+          (a.phone && a.remaining > 0.001 ? '<a href="https://wa.me/' + phoneClean + '?text=' + encodeURIComponent('Asc ' + a.name + ', waxaan kaa soo xasuusinaynaa haraagaaga ' + money(a.remaining) + ' ee ' + (S.profile.name || 'Sahafi') + '.') + '" target="_blank" rel="noopener" class="btn-whatsapp" style="text-decoration:none; padding:7px 11px; font-size:12px">' + ic('whatsapp', 14, 2) + 'WhatsApp</a>' : '') +
+          '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('user', 14, 2) + 'Eeg</button>' +
+          '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '">' +
+            '<span style="display:block; transition:transform .18s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
+        '</div>' +
+
+        (open ? '<div style="margin-top:8px; border-top:1px solid var(--glass-edge); padding-top:10px">' + expandPanel(a) + '</div>' : '') +
+      '</div>';
+    };
 
     let body;
     if (v.desktop) {
@@ -2006,6 +2065,7 @@ select.input { cursor: pointer; appearance: none;
             '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
             '<span><span style="display:block">' + esc(a.name) + '</span>' +
             '<span style="display:block; font-size:11px; color:var(--ink-3); font-weight:400">' + esc(a.phone || '—') + '</span></span></button></td>' +
+          '<td>' + rukunBadge(a.isRukun) + '</td>' +
           (v.wide ? '<td class="r n">' + money(a.consumed) + '</td>' : '') +
           '<td class="r n" style="color:var(--sage-600)">' + money(a.paid) + '</td>' +
           '<td class="r n" style="font-weight:600; ' + (a.remaining > 0.001 ? 'color:var(--accent-700)' : 'color:var(--ink-3)') + '">' + money(a.remaining) + '</td>' +
@@ -2017,12 +2077,12 @@ select.input { cursor: pointer; appearance: none;
             '<button class="icon-btn" data-act="openPay" data-id="' + a.id + '" title="' + t('Record payment') + '" aria-label="' + esc(F.recordPaymentFor(a.name)) + '">' + ic('card', 15, 2) + '</button>' +
             '<button class="icon-btn" data-act="openCustomer" data-id="' + a.id + '" title="' + t('View details') + '" aria-label="' + esc(F.viewCustomer(a.name)) + '">' + ic('user', 15, 2) + '</button>' +
             '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '" aria-label="' + esc(F.quickLookAt(a.name)) + '">' +
-              '<span style="display:block; transition:transform .25s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
+              '<span style="display:block; transition:transform .18s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
           '</div></td>';
         return '<tr>' + cells + '</tr>' + (open ? expandPanel(a) : '');
       }).join('');
 
-      const head = '<tr><th>' + t('Customer') + '</th>' + (v.wide ? '<th class="r">' + t('Consumed') + '</th>' : '') +
+      const head = '<tr><th>' + t('Customer') + '</th><th>Nooca Macmiilka</th>' + (v.wide ? '<th class="r">' + t('Consumed') + '</th>' : '') +
         '<th class="r">' + t('Paid') + '</th><th class="r">' + t('Haraa') + '</th>' +
         (v.wide ? '<th>' + t('Last') + '</th>' : '') + '<th>' + t('Expected payment') + '</th>' +
         (v.wide ? '<th style="text-align:center">' + t('Txns') + '</th>' : '') +
@@ -2030,42 +2090,26 @@ select.input { cursor: pointer; appearance: none;
 
       body = '<div class="tbl-scroll"><table class="tbl"><thead>' + head + '</thead><tbody>' + rowsHtml + '</tbody></table></div>';
     } else {
-      /* Mobile view: full cards with direct actions — no horizontal scrolling needed! */
-      body = '<div style="display:flex; flex-direction:column; gap:11px; padding:4px 0">' +
-        accs.map(a => {
-          const open = S.expanded === a.id;
-          const phoneClean = cleanPhone(a.phone);
-          return '<div style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:13px 14px; display:flex; flex-direction:column; gap:9px">' +
-            '<div style="display:flex; align-items:flex-start; gap:10px">' +
-              '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
-              '<div style="margin-right:auto; min-width:0">' +
-                '<button class="linkish" data-act="openCustomer" data-id="' + a.id + '" style="font-weight:600; font-size:14.5px; text-align:left">' + esc(a.name) + '</button>' +
-                (a.phone ? '<span style="display:block; font-size:11.5px; color:var(--ink-3)">' + esc(a.phone) + '</span>' : '') +
-              '</div>' +
-              '<span data-badgekey="c.' + a.id + '" data-badgeval="' + a.status + '">' + badge(a.status) + '</span>' +
-            '</div>' +
+      /* Mobile: grouped cleanly into Rukun vs Walk-in with zero sliding */
+      const rukunAccs = accs.filter(a => a.isRukun);
+      const caadAccs  = accs.filter(a => !a.isRukun);
 
-            '<div style="display:flex; align-items:center; justify-content:space-between; background:var(--solid-1); padding:8px 12px; border-radius:var(--r-sm); font-size:12.5px">' +
-              '<span class="muted">' + t('Outstanding Haraa') + '</span>' +
-              '<span class="num" style="font-weight:700; font-size:16px; ' + (a.remaining > 0.001 ? 'color:var(--accent-700)' : 'color:var(--sage-600)') + '">' + money(a.remaining) + '</span>' +
-            '</div>' +
+      const renderSection = (list, title, color, icon) => {
+        if (!list.length) return '';
+        return '<div style="margin-bottom:18px">' +
+          '<div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">' +
+            '<span style="width:8px; height:8px; border-radius:999px; background:' + color + '; flex:none"></span>' +
+            '<span style="font-weight:600; font-size:13px; color:' + color + '">' + icon + ' ' + title + '</span>' +
+            '<span style="font-size:11.5px; color:var(--ink-3); margin-left:2px">(' + list.length + ')</span>' +
+          '</div>' +
+          '<div style="display:flex; flex-direction:column; gap:10px">' +
+            list.map(mobileCard).join('') +
+          '</div>' +
+        '</div>';
+      };
 
-            (a.next ? '<div style="font-size:12px; ' + (a.nextOverdue ? 'color:var(--danger-700); font-weight:500' : 'color:var(--ink-2)') + '">' +
-              (a.nextOverdue ? F.overdueSince('') : F.due('')) + dateLong(a.next.dueDate) + (a.next.dueTime ? ' — ' + timeLabel(a.next.dueTime) : '') + '</div>' : '') +
-
-            /* Direct visible action buttons on mobile — completely zero sliding */
-            '<div style="display:flex; gap:7px; align-items:center; flex-wrap:wrap; margin-top:2px">' +
-              (a.remaining > 0.001 ? '<button class="btn btn-primary btn-sm" data-act="openPay" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('card', 14, 2) + t('Pay') + '</button>' : '') +
-              (a.phone && a.remaining > 0.001 ? '<a href="https://wa.me/' + phoneClean + '?text=' + encodeURIComponent('Asc ' + a.name + ', waxaan kaa soo xasuusinaynaa haraagaaga ' + money(a.remaining) + ' ee ' + (S.profile.name || 'Sahafi') + '.') + '" target="_blank" rel="noopener" class="btn-whatsapp" style="text-decoration:none; padding:7px 11px; font-size:12px">' + ic('whatsapp', 14, 2) + 'WhatsApp</a>' : '') +
-              '<button class="btn btn-glass btn-sm" data-act="openCustomer" data-id="' + a.id + '" style="flex:1; justify-content:center">' + ic('user', 14, 2) + 'Eeg</button>' +
-              '<button class="icon-btn" data-act="expand" data-id="' + a.id + '" title="' + t(open ? 'Collapse' : 'Quick look') + '" aria-expanded="' + open + '">' +
-                '<span style="display:block; transition:transform .25s var(--ease); transform:rotate(' + (open ? 180 : 0) + 'deg)">' + ic('chev', 15, 2.2) + '</span></button>' +
-            '</div>' +
-
-            (open ? '<div style="margin-top:8px; border-top:1px solid var(--glass-edge); padding-top:10px">' + expandPanel(a) + '</div>' : '') +
-          '</div>';
-        }).join('') +
-      '</div>';
+      body = renderSection(rukunAccs, 'Macaamiisha Rukunka (Bishii Bixiya)', 'var(--accent-700)', '⭐') +
+             renderSection(caadAccs, 'Deymaha Caadiga ah (Maalinle)', 'var(--ink-2)', '📋');
     }
 
     return '<div class="wrap anim-fade">' + custHead(all) + controls +
@@ -2076,9 +2120,10 @@ select.input { cursor: pointer; appearance: none;
   function custHead(all) {
     const owing = all.filter(a => a.remaining > 0.001);
     const overdue = all.filter(a => a.status === 'Overdue');
+    const rukunCount = all.filter(a => a.isRukun).length;
     return '<div class="page-head">' +
       '<div style="margin-right:auto"><h1>' + t('Customer Overview') + '</h1>' +
-        '<p class="sub">' + F.peopleOnBook(all.length, owing.length, all.length - owing.length, overdue.length) + '</p></div>' +
+        '<p class="sub">' + F.peopleOnBook(all.length, owing.length, all.length - owing.length, overdue.length) + ' · <strong style="color:var(--accent-700)">' + rukunCount + ' Rukun ah</strong></p></div>' +
       '<button class="btn btn-primary" data-act="openAdd">' + ic('plus', 16, 2.2) + t('Add Record') + '</button>' +
     '</div>';
   }
@@ -2121,27 +2166,52 @@ select.input { cursor: pointer; appearance: none;
       '<div class="detail-cols" style="align-items:start; margin-bottom:16px">' +
         '<section class="sheet sheet-pad">' +
           '<div class="section-head"><h3>' + t('Food history') + '</h3><span class="sub">' + F.nItems(a.count) + '</span></div>' +
-          '<div class="tbl-scroll"><table class="tbl"><thead><tr>' +
-            '<th>' + t('Date') + '</th><th>' + t('Food') + '</th><th class="r">' + t('Amount') +
-            '</th><th class="r">' + t('Paid') + '</th><th class="r">' + t('Haraa') + '</th><th>' + t('Expected payment') +
-            '</th><th>' + t('Status') + '</th><th class="r"></th>' +
-          '</tr></thead><tbody>' +
-          (a.records.length ? a.records.map(r => {
-            const st = recStatus(r);
-            return '<tr data-newid="' + r.id + '">' +
-              '<td class="muted-3" style="white-space:nowrap">' + dateLabel(r.date) + '</td>' +
-              '<td>' + esc(r.food) + (r.note ? '<span style="display:block; font-size:11px; color:var(--ink-3)">' + esc(r.note) + '</span>' : '') + '</td>' +
-              '<td class="r n">' + money(r.total) + '</td>' +
-              '<td class="r n" style="color:var(--sage-600)">' + money(r.paid) + '</td>' +
-              '<td class="r n" style="font-weight:600">' + money(r.total - r.paid) + '</td>' +
-              '<td style="white-space:nowrap">' + dueCell(r) + '</td>' +
-              '<td><span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span></td>' +
-              '<td><div style="display:flex; gap:5px; justify-content:flex-end">' +
-                '<button class="icon-btn" data-act="editRecord" data-id="' + r.id + '" title="' + t('Edit') + '" aria-label="' + t('Edit record') + '">' + ic('edit', 14, 2) + '</button>' +
-                '<button class="icon-btn danger" data-act="deleteRecord" data-id="' + r.id + '" title="' + t('Delete') + '" aria-label="' + t('Delete record') + '">' + ic('trash', 14, 2) + '</button>' +
-              '</div></td></tr>';
-          }).join('') : '<tr><td colspan="8" class="sub" style="text-align:center; padding:26px">Wali cunto lama diiwaangelin.</td></tr>') +
-          '</tbody></table></div>' +
+          (a.records.length
+            ? (v.desktop
+              ? '<div class="tbl-scroll"><table class="tbl"><thead><tr>' +
+                  '<th>' + t('Date') + '</th><th>' + t('Food') + '</th><th class="r">' + t('Amount') +
+                  '</th><th class="r">' + t('Paid') + '</th><th class="r">' + t('Haraa') + '</th><th>' + t('Expected payment') +
+                  '</th><th>' + t('Status') + '</th><th class="r"></th>' +
+                '</tr></thead><tbody>' +
+                a.records.map(r => {
+                  const st = recStatus(r);
+                  return '<tr data-newid="' + r.id + '">' +
+                    '<td class="muted-3" style="white-space:nowrap">' + dateLabel(r.date) + '</td>' +
+                    '<td>' + esc(r.food) + (r.note ? '<span style="display:block; font-size:11px; color:var(--ink-3)">' + esc(r.note) + '</span>' : '') + '</td>' +
+                    '<td class="r n">' + money(r.total) + '</td>' +
+                    '<td class="r n" style="color:var(--sage-600)">' + money(r.paid) + '</td>' +
+                    '<td class="r n" style="font-weight:600">' + money(r.total - r.paid) + '</td>' +
+                    '<td style="white-space:nowrap">' + dueCell(r) + '</td>' +
+                    '<td><span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span></td>' +
+                    '<td><div style="display:flex; gap:5px; justify-content:flex-end">' +
+                      '<button class="icon-btn" data-act="editRecord" data-id="' + r.id + '" title="' + t('Edit') + '" aria-label="' + t('Edit record') + '">' + ic('edit', 14, 2) + '</button>' +
+                      '<button class="icon-btn danger" data-act="deleteRecord" data-id="' + r.id + '" title="' + t('Delete') + '" aria-label="' + t('Delete record') + '">' + ic('trash', 14, 2) + '</button>' +
+                    '</div></td></tr>';
+                }).join('') +
+                '</tbody></table></div>'
+              : '<div style="display:flex; flex-direction:column; gap:9px">' +
+                a.records.map(r => {
+                  const st = recStatus(r);
+                  return '<div data-newid="' + r.id + '" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:11px 13px; display:flex; flex-direction:column; gap:6px">' +
+                    '<div style="display:flex; align-items:center; justify-content:space-between">' +
+                      '<span style="font-weight:600; font-size:13.5px">' + esc(r.food) + '</span>' +
+                      '<span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span>' +
+                    '</div>' +
+                    '<div class="muted-3" style="font-size:12px">' + dateLabel(r.date) + (r.note ? ' · ' + esc(r.note) : '') + '</div>' +
+                    '<div style="display:flex; align-items:center; gap:8px; font-size:12.5px">' +
+                      '<span>Wadarta: <strong class="n">' + money(r.total) + '</strong></span>' +
+                      '<span>· Bixiyay: <strong class="n" style="color:var(--sage-600)">' + money(r.paid) + '</strong></span>' +
+                      '<span style="margin-left:auto">Haraa: <strong class="n" style="color:var(--accent-700)">' + money(r.total - r.paid) + '</strong></span>' +
+                    '</div>' +
+                    (r.dueDate ? '<div style="font-size:11.5px; ' + (isOverdue(r) ? 'color:var(--danger-700)' : 'color:var(--ink-3)') + '">' +
+                      (isOverdue(r) ? 'Waqtigu wuxuu dhaafay: ' : 'La filayo: ') + dateLong(r.dueDate) + (r.dueTime ? ' ' + timeLabel(r.dueTime) : '') + '</div>' : '') +
+                    '<div style="display:flex; gap:6px; justify-content:flex-end; border-top:1px dashed var(--glass-edge); padding-top:6px; margin-top:2px">' +
+                      '<button class="btn btn-glass btn-sm" data-act="editRecord" data-id="' + r.id + '">' + ic('edit', 13, 2) + t('Edit') + '</button>' +
+                      '<button class="btn btn-glass btn-sm" data-act="deleteRecord" data-id="' + r.id + '">' + ic('trash', 13, 2) + t('Delete') + '</button>' +
+                    '</div>' +
+                  '</div>';
+                }).join('') + '</div>')
+            : '<p class="sub" style="text-align:center; padding:20px 0">Wali cunto lama diiwaangelin.</p>') +
         '</section>' +
 
         '<div class="grid" style="gap:14px">' +
@@ -2162,10 +2232,14 @@ select.input { cursor: pointer; appearance: none;
           '<section class="sheet sheet-pad">' +
             '<div class="section-head"><h3>' + t('Payment history') + '</h3></div>' +
             (a.payments.length
-              ? '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>' + t('Date') + '</th><th>' + t('Method') + '</th><th class="r">' + t('Amount') + '</th></tr></thead><tbody>' +
-                a.payments.map(p => '<tr><td class="muted-3">' + dateLabel(p.date) + '</td><td class="muted">' + esc(p.note) + '</td>' +
-                  '<td class="r n" style="font-weight:600; color:var(--sage-600)">' + money(p.amount) + '</td></tr>').join('') +
-                '</tbody></table></div>'
+              ? '<div style="display:flex; flex-direction:column; gap:8px">' +
+                a.payments.map(p =>
+                  '<div style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-radius:var(--r-sm); background:var(--solid-2); border:1px solid var(--glass-edge)">' +
+                    '<div><span style="font-weight:500; font-size:13px; display:block">' + esc(p.note || 'Cash') + '</span>' +
+                    '<span class="muted-3" style="font-size:11.5px">' + dateLabel(p.date) + '</span></div>' +
+                    '<span class="num" style="font-weight:700; font-size:15px; color:var(--sage-600)">+' + money(p.amount) + '</span>' +
+                  '</div>'
+                ).join('') + '</div>'
               : '<div class="empty" style="padding:22px 0">' +
                   '<div class="empty-ico" style="width:52px; height:52px; border-radius:17px">' + ic('card', 22, 2) + '</div>' +
                   '<h3 style="font-size:15px">' + t('No payments yet') + '</h3>' +
@@ -2252,18 +2326,19 @@ select.input { cursor: pointer; appearance: none;
 
         '<header class="report-head">' +
           logoMark('report-logo') +
-          '<div style="min-width:0; max-width:600px">' +
-            '<div class="eyebrow" style="color:var(--accent-700); margin-bottom:3px">' + t('Statement') + '</div>' +
-            '<h2 class="report-title">' + esc(S.profile.name || 'Sahafi Restaurant') + '</h2>' +
-            '<p class="sub" style="font-size:13.5px; margin-top:2px">' + t('Monthly Rent Book Statement') + ' · ' + esc(mLabel) + '</p>' +
-            (S.profile.phone ? '<p style="font-size:13px; font-weight:500; color:var(--accent-700); margin-top:3px">' + esc(S.profile.phone) + '</p>' : '') +
+          '<div style="min-width:0; max-width:680px; margin:0 auto; text-align:center">' +
+            '<div class="eyebrow" style="color:var(--accent-700); margin-bottom:4px; letter-spacing:0.12em">WARBIXINTA MAALIYADDEED EE BISHA</div>' +
+            '<h2 class="report-title" style="font-size:30px; margin-bottom:4px">' + esc(S.profile.name || 'Sahafi Restaurant') + '</h2>' +
+            '<p class="sub" style="font-size:14px; font-weight:500; color:var(--ink-2)">Buugga Deynta & Xisaabaadka Rukunka · ' + esc(mLabel) + '</p>' +
+            (S.profile.phone ? '<p style="font-size:13px; font-weight:600; color:var(--accent-700); margin-top:4px">' + esc(S.profile.phone) + '</p>' : '') +
           '</div>' +
-          '<div class="report-meta">' +
-            '<div><span class="muted-3">' + t('Reporting period') + ':</span> <strong style="font-weight:600">' + esc(mLabel) + '</strong></div>' +
-            '<div><span class="muted-3">' + t('Generated') + ':</span> ' +
+          '<div class="report-meta" style="width:100%; display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:8px; padding-top:12px; border-top:1px solid rgba(198,113,57,.2)">' +
+            '<div><span class="muted-3">Muddada Warbixinta:</span> <strong style="font-weight:600">' + esc(mLabel) + '</strong></div>' +
+            '<div><span class="muted-3">Taariikhda La Soo Saaray:</span> ' +
               dateLong(today()) + ' · ' +
               timeLabel(String(new Date().getHours()).padStart(2, '0') + ':' +
                         String(new Date().getMinutes()).padStart(2, '0')) + '</div>' +
+            '<div><span class="muted-3">Xaaladda:</span> <strong style="color:var(--sage-600)">Runtii La Xaqiijiyay ✓</strong></div>' +
           '</div>' +
         '</header>' +
 
@@ -2271,7 +2346,7 @@ select.input { cursor: pointer; appearance: none;
 
           /* headline figures */
           '<section class="report-sec">' +
-            '<div class="report-sec-title">' + t('Financial summary') + '<span class="n">' + F.nTransactions(recs.length) + '</span></div>' +
+            '<div class="report-sec-title">Kooban Maaliyadeed (Executive Summary)<span class="n">' + F.nTransactions(recs.length) + '</span></div>' +
             '<div class="grid-stats">' +
               stat('m.total', t('Total amount'), total, money(total), { foot: F.nFoodRecords(recs.length) }) +
               stat('m.collected', t('Collected'), collected, money(collected), { tone: 'sage', foot: F.pctOfMonth(rate) }) +
@@ -2298,12 +2373,12 @@ select.input { cursor: pointer; appearance: none;
             '<div class="split-cols" style="margin-top:16px; gap:22px">' +
               '<div><div class="eyebrow" style="margin-bottom:5px">' + t('Completed accounts') + '</div>' +
                 (settled.length
-                  ? '<div>' + settled.map(a => summaryRow(esc(a.c.name), money(a.consumed))).join('') + '</div>'
+                  ? '<div>' + settled.map(a => summaryRow(esc(a.c.name) + (a.c.isRukun ? ' ⭐' : ''), money(a.consumed))).join('') + '</div>'
                   : '<p class="sub" style="font-size:12.5px">' + t('No accounts were fully settled this month.') + '</p>') +
               '</div>' +
               '<div><div class="eyebrow" style="margin-bottom:5px">' + t('Customers with outstanding balances') + '</div>' +
                 (owing.length
-                  ? '<div>' + owing.map(a => summaryRow(esc(a.c.name), '<span style="color:var(--accent-700)">' + money(a.remaining) + '</span>')).join('') + '</div>'
+                  ? '<div>' + owing.map(a => summaryRow(esc(a.c.name) + (a.c.isRukun ? ' ⭐' : ''), '<span style="color:var(--accent-700)">' + money(a.remaining) + '</span>')).join('') + '</div>'
                   : '<p class="sub" style="font-size:12.5px">' + t('Every account is clear.') + '</p>') +
               '</div>' +
             '</div>' +
@@ -2311,15 +2386,16 @@ select.input { cursor: pointer; appearance: none;
 
           /* customer table */
           '<section class="report-sec">' +
-            '<div class="report-sec-title">' + t('Customer accounts') + '<span class="n">' + F.nCustomers(monthAccs.length) + '</span></div>' +
+            '<div class="report-sec-title">Xisaabaadka Macaamiisha (Rukunka & Deymaha)<span class="n">' + F.nCustomers(monthAccs.length) + '</span></div>' +
             (monthAccs.length
               ? '<table class="tbl tbl-flex"><thead><tr>' +
-                  '<th>' + t('Customer') + '</th><th class="hide-md">' + t('Phone') + '</th><th class="c hide-md">' + t('Txns') + '</th>' +
+                  '<th>' + t('Customer') + '</th><th>Nooc</th><th class="hide-md">' + t('Phone') + '</th><th class="c hide-md">' + t('Txns') + '</th>' +
                   '<th class="r">' + t('Consumed') + '</th><th class="r">' + t('Paid') + '</th><th class="r">' + t('Remaining') +
                   '</th><th>' + t('Expected payment') + '</th><th>' + t('Status') + '</th>' +
                 '</tr></thead><tbody>' +
                 monthAccs.map((a, i) => '<tr class="rowin" style="--i:' + i + '">' +
                   td(t('Customer'), esc(a.c.name), 'lead') +
+                  td('Nooc', rukunBadge(a.c.isRukun)) +
                   td(t('Phone'), esc(a.c.phone || '—'), 'muted-3 nowrap hide-md') +
                   td(t('Txns'), a.count, 'c muted-3 hide-md') +
                   td(t('Consumed'), money(a.consumed), 'r n') +
@@ -2397,7 +2473,7 @@ select.input { cursor: pointer; appearance: none;
               : '<p class="sub">' + F.noPaymentsIn(esc(mLabel)) + '</p>') +
           '</section>' +
 
-          /* closing summary */
+          /* closing summary & verification */
           '<section class="report-sec" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-lg); padding:20px 24px">' +
             '<div class="report-sec-title" style="border:0; padding-bottom:4px">' + t('Statement summary') + '</div>' +
             '<div class="split-cols" style="gap:0 30px">' +
@@ -2412,6 +2488,22 @@ select.input { cursor: pointer; appearance: none;
                 summaryRow(t('Total collected'), money(collected)) +
                 summaryRow(t('Outstanding Haraa'), money(outstanding)) +
                 summaryRow(t('Closing balance owed'), money(outstanding), true) +
+              '</div>' +
+            '</div>' +
+
+            /* Official Management Sign-off & Stamp block */
+            '<div style="display:flex; justify-content:space-around; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-top:28px; padding-top:20px; border-top:1px dashed rgba(96,74,48,.18)">' +
+              '<div style="text-align:center; min-width:180px">' +
+                '<div style="height:36px; border-bottom:1.5px solid var(--ink); margin-bottom:6px"></div>' +
+                '<div style="font-size:12px; font-weight:600; color:var(--ink)">Saxiixa Maamulka</div>' +
+                '<div class="muted-3" style="font-size:11px">General Manager Signature</div>' +
+              '</div>' +
+              '<div style="text-align:center; min-width:150px">' +
+                '<div style="width:72px; height:72px; border:2px dashed var(--accent); border-radius:50%; margin:0 auto 6px; display:grid; place-items:center; color:var(--accent); font-size:9.5px; font-weight:700; text-transform:uppercase; transform:rotate(-6deg); line-height:1.2; padding:4px">' +
+                  'SHAAMBADDA<br>RASMIGA AH' +
+                '</div>' +
+                '<div style="font-size:12px; font-weight:600; color:var(--ink)">Shaambadda Rasmiga</div>' +
+                '<div class="muted-3" style="font-size:11px">Official Restaurant Stamp</div>' +
               '</div>' +
             '</div>' +
           '</section>' +
@@ -2596,6 +2688,15 @@ select.input { cursor: pointer; appearance: none;
             '<datalist id="nameList">' + S.data.customers.map(c => '<option value="' + esc(c.name) + '"></option>').join('') + '</datalist></div>' +
           '<div class="field" style="flex:1; min-width:145px"><label for="formPhone">' + t('Phone') + '</label>' +
             '<input id="formPhone" class="input" placeholder="+252 …" value="' + esc(f.phone) + '"></div>' +
+        '</div>' +
+
+        /* Rukun toggle — clearly labels customer type */
+        '<div style="padding:10px 14px; border-radius:var(--r-md); background:var(--solid-2); border:1px solid var(--glass-edge); display:flex; align-items:center; gap:10px; flex-wrap:wrap">' +
+          '<span style="font-size:12.5px; font-weight:500; margin-right:auto">Nooca Macmiilka</span>' +
+          '<div class="seg" role="group">' +
+            '<button type="button" class="seg-opt" data-act="setRukun" data-val="0" aria-pressed="' + (!f.isRukun) + '">Deyn Maalinle</button>' +
+            '<button type="button" class="seg-opt" data-act="setRukun" data-val="1" aria-pressed="' + (!!f.isRukun) + '">⭐ Rukun (Bishii)</button>' +
+          '</div>' +
         '</div>' +
 
         '<div class="field"><label for="formFood">' + t('Food') + '</label>' +
@@ -2869,6 +2970,33 @@ select.input { cursor: pointer; appearance: none;
 
     filter: (el) => { S.filter = el.dataset.filter; render(); },
     custFilter: (el) => { S.custFilter = el.dataset.filter; render(); },
+    setRukun: (el) => {
+      S.form = Object.assign({}, S.form, { isRukun: el.dataset.val === '1' });
+      // If editing customer name already exists, update their type too
+      const name = (S.form.name || '').trim().toLowerCase();
+      if (name) {
+        const cust = S.data.customers.find(c => c.name.toLowerCase() === name);
+        if (cust) {
+          commit(Object.assign({}, S.data, {
+            customers: S.data.customers.map(c => c.id === cust.id ? Object.assign({}, c, { isRukun: el.dataset.val === '1' }) : c)
+          }));
+        }
+      }
+      const modal = document.querySelector('.modal');
+      if (modal) {
+        modal.querySelectorAll('[data-act="setRukun"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.val === el.dataset.val)));
+      }
+    },
+    toggleRukun: (el) => {
+      const id = el.dataset.id;
+      const cust = custOf(id);
+      if (!cust) return;
+      commit(Object.assign({}, S.data, {
+        customers: S.data.customers.map(c => c.id === id ? Object.assign({}, c, { isRukun: !c.isRukun }) : c)
+      }));
+      vibrate(10);
+      toast(cust.isRukun ? 'Waxaa laga beddelay: Deyn Maalinle' : 'Waxaa laga beddelay: Rukun ⭐');
+    },
 
     setLang: (el) => {
       if (S.lang === el.dataset.lang) return;
