@@ -13,6 +13,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Direct PDF generation & rich charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    Sahafi — tokens
@@ -2321,7 +2324,8 @@ select.input { cursor: pointer; appearance: none;
           keys.map(k => '<option value="' + k + '"' + (k === monthKey ? ' selected' : '') + '>' +
             monthName(k) + '</option>').join('') +
         '</select>' +
-        '<button class="btn btn-primary" data-act="print">' + ic('download', 16, 2.2) + 'Degso Warbixinta (PDF Midab leh)</button>' +
+        '<button class="btn btn-primary" data-act="downloadReportPdf" id="btnDownloadPdf">' + ic('download', 16, 2.2) + 'Toos u Degso PDF (Midab Leh)</button>' +
+        '<button class="btn btn-glass" data-act="print">' + ic('print', 15, 2) + 'Daabac (Print)</button>' +
       '</div>';
 
     const summaryRow = (label, value, strong) =>
@@ -2329,13 +2333,13 @@ select.input { cursor: pointer; appearance: none;
       '<span class="kv-v"' + (strong ? ' style="font-size:15px"' : '') + '>' + value + '</span></div>';
 
     return '<div class="wrap anim-fade" style="max-width:1040px">' + picker +
-      '<article class="report-doc">' +
+      '<article id="reportDocContent" class="report-doc">' +
 
         '<header class="report-head">' +
           logoMark('report-logo') +
           '<div style="min-width:0; max-width:680px; margin:0 auto; text-align:center">' +
-            '<div class="eyebrow" style="color:var(--accent-700); margin-bottom:4px; letter-spacing:0.12em">WARBIXINTA MAALIYADDEED EE BISHA</div>' +
-            '<h2 class="report-title" style="font-size:30px; margin-bottom:4px">' + esc(S.profile.name || 'Sahafi Restaurant') + '</h2>' +
+            '<div class="eyebrow" style="color:var(--accent-700); margin-bottom:4px; letter-spacing:0.14em">WARBIXINTA MAALIYADDEED EE BISHA</div>' +
+            '<h2 class="report-title" style="font-size:30px; margin-bottom:4px; font-family:Lora,serif">' + esc(S.profile.name || 'Sahafi Restaurant') + '</h2>' +
             '<p class="sub" style="font-size:14px; font-weight:500; color:var(--ink-2)">Buugga Deynta & Xisaabaadka Rukunka · ' + esc(mLabel) + '</p>' +
             (S.profile.phone ? '<p style="font-size:13px; font-weight:600; color:var(--accent-700); margin-top:4px">' + esc(S.profile.phone) + '</p>' : '') +
           '</div>' +
@@ -2368,14 +2372,28 @@ select.input { cursor: pointer; appearance: none;
             '</div>' +
           '</section>' +
 
-          /* status breakdown */
+          /* visual financial breakdown & charts */
           '<section class="report-sec">' +
-            '<div class="report-sec-title">' + t('Payment status breakdown') + '</div>' +
-            '<div class="grid-mini">' +
-              miniStat('m.mixPaid', t('Paid in full'), mix.Paid, 'paid') +
-              miniStat('m.mixPartial', t('Partially paid'), mix.Partial, 'partial') +
-              miniStat('m.mixUnpaid', t('Unpaid'), mix.Unpaid, 'unpaid') +
-              miniStat('m.mixOverdue', t('Overdue'), mix.Overdue, 'overdue') +
+            '<div class="report-sec-title">Shaxanka Xisaabaadka & Xaaladda Lacagaha (Financial Visual Breakdown)</div>' +
+            '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; align-items:center; background:var(--solid-2); padding:18px 22px; border-radius:var(--r-lg); border:1px solid var(--glass-edge)">' +
+              '<div style="display:flex; flex-direction:column; gap:10px">' +
+                '<div style="font-size:13px; font-weight:600; color:var(--ink-2)">Kala Qaybsanaanta Xisaabta:</div>' +
+                '<div style="display:flex; flex-direction:column; gap:8px">' +
+                  '<div style="display:flex; justify-content:space-between; font-size:12.5px"><span>✅ La Bixiyay (' + rate + '%):</span><strong style="color:var(--sage-600)">' + money(collected) + '</strong></div>' +
+                  '<div class="bar bar-sage"><i style="width:' + rate + '%"></i></div>' +
+                  '<div style="display:flex; justify-content:space-between; font-size:12.5px; margin-top:4px"><span>⏳ Haraaga Ku Maqan (' + (100 - rate) + '%):</span><strong style="color:var(--accent-700)">' + money(outstanding) + '</strong></div>' +
+                  '<div class="bar bar-accent"><i style="width:' + (100 - rate) + '%"></i></div>' +
+                '</div>' +
+              '</div>' +
+              '<div style="display:flex; flex-direction:column; gap:10px">' +
+                '<div style="font-size:13px; font-weight:600; color:var(--ink-2)">Xaaladda Diiwaanka:</div>' +
+                '<div class="grid-mini" style="grid-template-columns:repeat(2, 1fr); gap:8px">' +
+                  miniStat('m.mixPaid', t('Paid in full'), mix.Paid, 'paid') +
+                  miniStat('m.mixPartial', t('Partially paid'), mix.Partial, 'partial') +
+                  miniStat('m.mixUnpaid', t('Unpaid'), mix.Unpaid, 'unpaid') +
+                  miniStat('m.mixOverdue', t('Overdue'), mix.Overdue, 'overdue') +
+                '</div>' +
+              '</div>' +
             '</div>' +
             '<div class="split-cols" style="margin-top:16px; gap:22px">' +
               '<div><div class="eyebrow" style="margin-bottom:5px">' + t('Completed accounts') + '</div>' +
@@ -3055,6 +3073,37 @@ select.input { cursor: pointer; appearance: none;
       // Figures are re-labelled, not re-counted: keep them from replaying.
       numStore.clear(); badgeStore.clear(); firstPaint = false;
       render();
+    },
+    downloadReportPdf: () => {
+      const el = document.getElementById('reportDocContent');
+      if (!el) { window.print(); return; }
+      
+      const restName = (S.profile.name || 'Sahafi_Restaurant').replace(/\s+/g, '_');
+      const filename = `Warbixinta_${restName}_${S.month || today().slice(0, 7)}.pdf`;
+
+      toast('📄 PDF-ka waxaa loo diyaarinayaa soo dejin degdeg ah...');
+      vibrate(15);
+
+      if (typeof html2pdf !== 'undefined') {
+        const opt = {
+          margin:       [8, 8, 8, 8],
+          filename:     filename,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        html2pdf().set(opt).from(el).save().then(() => {
+          toast('✅ Warbixinta PDF-ka si guul leh ayaa loo soo dejiyay!');
+          vibrate([20, 30, 20]);
+          launchConfetti();
+        }).catch(err => {
+          console.error('PDF download error:', err);
+          window.print();
+        });
+      } else {
+        window.print();
+      }
     },
     print: () => window.print(),
     pickLogo: () => { const i = document.getElementById('logoInput'); if (i) i.click(); },
