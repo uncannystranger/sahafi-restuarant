@@ -2,7 +2,7 @@
 <html lang="so">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <title>Sahafi Rent Book</title>
 <meta name="theme-color" content="#c67139">
 <meta name="mobile-web-app-capable" content="yes">
@@ -925,6 +925,17 @@ select.input { cursor: pointer; appearance: none;
   80%  { opacity: 1; }
   100% { transform: translateY(100vh) rotate(var(--spin, 360deg)) scale(.7); opacity: 0; }
 }
+/* Awwwards Shop Local RI: clear balance hierarchy and stable records. */
+.ledger-balance { font-weight:700; color:var(--accent-700); font-variant-numeric:tabular-nums; }
+.ledger-results { font-size:12px; color:var(--ink-2); margin:0 0 12px; font-variant-numeric:tabular-nums; }
+.tbl tbody tr:focus-within { background:var(--accent-100); }
+.overdue-pulse { animation:none; border-left:3px solid var(--danger-700); }
+.modal { max-height:calc(100dvh - 36px); overscroll-behavior:contain; scroll-padding-block:20px; }
+.modal .input { scroll-margin-block:20px; }
+.backdrop { top:var(--ledger-viewport-top,0px); bottom:auto; height:var(--ledger-visible-height,100dvh); }
+.backdrop .modal { max-height:calc(var(--ledger-visible-height,100dvh) - 36px); }
+@media(max-width:767px) { .modal { max-height:92dvh; } .modal input, .modal select, .modal textarea { font-size:16px; } .seg { max-width:100%; flex-wrap:wrap; } }
+@media(prefers-reduced-motion:reduce) { .modal, #toast { animation:none; } }
 </style>
 </head>
 <body>
@@ -1597,50 +1608,16 @@ select.input { cursor: pointer; appearance: none;
     'stroke="currentColor" stroke-width="' + (sw || 1.9) + '" stroke-linecap="round" stroke-linejoin="round" ' +
     'aria-hidden="true">' + P[name] + '</svg>';
 
-  /* ══ animation engine ═══════════════════════════════════════════
-     Numbers count from their previous value, bars grow into place, and
-     badges pop only when the status behind them actually changed. Every
-     effect is keyed, so an unchanged figure never re-animates. */
-  const numStore = new Map();
+  /* Financial figures render their final value immediately. Only surfaces,
+     progress bars and confirmations animate (Awwwards form-fill reference). */
   const badgeStore = new Map();
   const newIds = new Set();
-  let firstPaint = true;
-
   const num = (key, value, text, cls, attrs) =>
-    '<span class="' + (cls || 'num') + '" data-numkey="' + key + '" data-numval="' + value +
-    '" data-numtext="' + esc(text) + '"' + (attrs || '') + '>' + esc(text) + '</span>';
-
+    '<span class="' + (cls || 'num') + '"' + (attrs || '') + '>' + esc(text) + '</span>';
   const bar = (pct, tone) =>
     '<div class="bar bar-' + (tone || 'accent') + '"><i data-bar="' + Math.max(0, Math.min(100, pct)) + '"></i></div>';
-
   function runAnimations() {
     const still = reduceMotion();
-
-    document.querySelectorAll('[data-numkey]').forEach(el => {
-      const key = el.dataset.numkey;
-      const to = Number(el.dataset.numval);
-      const text = el.dataset.numtext;
-      const from = numStore.has(key) ? numStore.get(key) : (firstPaint ? 0 : to);
-      numStore.set(key, to);
-      if (still || from === to || !isFinite(to) || !isFinite(from)) { el.textContent = text; return; }
-      // Re-derive the label from the tween so prefixes/suffixes survive.
-      const digits = text.match(/-?[\d,]+(\.\d+)?/);
-      if (!digits) { el.textContent = text; return; }
-      const pre = text.slice(0, digits.index);
-      const post = text.slice(digits.index + digits[0].length);
-      const dec = (digits[0].split('.')[1] || '').length;
-      const t0 = performance.now();
-      const dur = 140;
-      const step = (t) => {
-        const p = Math.min(1, (t - t0) / dur);
-        const e = 1 - Math.pow(1 - p, 3);
-        const v = from + (to - from) * e;
-        el.textContent = pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-US')) + post;
-        if (p < 1) requestAnimationFrame(step); else el.textContent = text;
-      };
-      requestAnimationFrame(step);
-    });
-
     document.querySelectorAll('[data-bar]').forEach(el => {
       const pct = el.dataset.bar + '%';
       if (still) { el.style.width = pct; return; }
@@ -1664,7 +1641,6 @@ select.input { cursor: pointer; appearance: none;
       });
     }
     newIds.clear();
-    firstPaint = false;
   }
 
   /* ══ shared view pieces ═════════════════════════════════════════ */
@@ -1822,7 +1798,7 @@ select.input { cursor: pointer; appearance: none;
                   return '<tr data-act="openCustomer" data-id="' + r.customerId + '" style="cursor:pointer">' +
                     '<td><span style="font-weight:500">' + esc(c.name) + '</span></td>' +
                     '<td class="muted">' + esc(r.food) + '</td>' +
-                    '<td class="r n" style="font-weight:600">' + money(r.total - r.paid) + '</td>' +
+                    '<td class="r n ledger-balance">' + money(r.total - r.paid) + '</td>' +
                     '<td>' + dueCell(r) + '</td>' +
                     '<td><span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span></td>' +
                   '</tr>';
@@ -1914,7 +1890,7 @@ select.input { cursor: pointer; appearance: none;
           '<td class="muted">' + esc(r.food) + (r.note ? '<span style="display:block; font-size:11px; color:var(--ink-3)">' + esc(r.note) + '</span>' : '') + '</td>' +
           '<td class="r n">' + money(r.total) + '</td>' +
           '<td class="r n" style="color:var(--sage-600)">' + money(r.paid) + '</td>' +
-          '<td class="r n" style="font-weight:600">' + money(r.total - r.paid) + '</td>' +
+          '<td class="r n ledger-balance">' + money(r.total - r.paid) + '</td>' +
           '<td class="muted-3" style="white-space:nowrap">' + dateLabel(r.date) + '</td>' +
           '<td style="white-space:nowrap">' + dueCell(r) + '</td>' +
           '<td><span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span></td>' +
@@ -1941,7 +1917,7 @@ select.input { cursor: pointer; appearance: none;
             '<div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap">' +
               '<span class="sub" style="margin-right:auto; font-size:12.5px">' + t('Total') + ' <span class="n">' + money(r.total) +
                 '</span> · ' + t('Paid') + ' <span class="n">' + money(r.paid) +
-                '</span> · <strong class="n">' + t('Haraa') + ' ' + money(r.total - r.paid) + '</strong></span>' +
+                '</span> · <strong class="n ledger-balance">' + t('Haraa') + ' ' + money(r.total - r.paid) + '</strong></span>' +
               '<button class="btn btn-glass btn-sm" data-act="openPay" data-id="' + r.customerId + '">' + t('Pay') + '</button>' +
               '<button class="btn btn-glass btn-sm" data-act="editRecord" data-id="' + r.id + '">' + t('Edit') + '</button>' +
               '<button class="btn btn-glass btn-sm" data-act="deleteRecord" data-id="' + r.id + '">' + t('Delete') + '</button>' +
@@ -1956,6 +1932,7 @@ select.input { cursor: pointer; appearance: none;
           '<p class="sub">Diiwaanka cuntooyinka iyo deynta maalinlaha ah ee la qaatay.</p></div>' +
         '<button class="btn btn-primary" data-act="openAdd">' + ic('plus', 16, 2.2) + t('Add Record') + '</button>' +
       '</div>' + controls +
+      '<p class="ledger-results" role="status">' + rows.length + (isSo() ? ' diiwaan' : ' records') + ' · ' + t(S.filter) + '</p>' +
       '<section class="sheet" style="padding:6px 18px 10px">' + body + '</section>' +
     '</div>';
   }
@@ -2192,7 +2169,7 @@ select.input { cursor: pointer; appearance: none;
                     '<td>' + esc(r.food) + (r.note ? '<span style="display:block; font-size:11px; color:var(--ink-3)">' + esc(r.note) + '</span>' : '') + '</td>' +
                     '<td class="r n">' + money(r.total) + '</td>' +
                     '<td class="r n" style="color:var(--sage-600)">' + money(r.paid) + '</td>' +
-                    '<td class="r n" style="font-weight:600">' + money(r.total - r.paid) + '</td>' +
+                    '<td class="r n ledger-balance">' + money(r.total - r.paid) + '</td>' +
                     '<td style="white-space:nowrap">' + dueCell(r) + '</td>' +
                     '<td><span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span></td>' +
                     '<td><div style="display:flex; gap:5px; justify-content:flex-end">' +
@@ -2702,7 +2679,7 @@ select.input { cursor: pointer; appearance: none;
     const f = S.form;
     const haraa = Math.max(0, round2(f.total) - round2(f.paid));
     return '<div class="backdrop no-print" data-act="backdrop">' +
-      '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">' +
+      '<div class="modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="formTitle">' +
         '<div class="modal-head">' +
           '<div style="margin-right:auto">' +
             '<h2 id="formTitle" style="font-size:21px">' + t(S.editId ? 'Edit record' : 'Add record') + '</h2>' +
@@ -2798,7 +2775,7 @@ select.input { cursor: pointer; appearance: none;
   function viewQuickAddDialog() {
     const f = S.form;
     return '<div class="backdrop no-print" data-act="backdrop">' +
-      '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="quickTitle">' +
+      '<div class="modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="quickTitle">' +
         '<div class="modal-head">' +
           '<div style="margin-right:auto">' +
             '<h2 id="quickTitle" style="font-size:20px; display:flex; align-items:center; gap:6px">' +
@@ -2852,7 +2829,7 @@ select.input { cursor: pointer; appearance: none;
     const phoneClean = cleanPhone(c.phone);
 
     return '<div class="backdrop no-print" data-act="backdrop">' +
-      '<div class="modal" style="width:min(460px,100%)" role="dialog" aria-modal="true" aria-labelledby="payTitle">' +
+      '<div class="modal" style="width:min(460px,100%)" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="payTitle">' +
         '<div class="modal-head">' +
           '<div style="margin-right:auto"><h2 id="payTitle" style="font-size:21px">' + t('Record payment') + '</h2>' +
             '<p class="sub" style="font-size:12.5px">' + esc(a.name) + '</p></div>' +
@@ -2868,7 +2845,7 @@ select.input { cursor: pointer; appearance: none;
 
         '<div style="display:flex; gap:11px; flex-wrap:wrap">' +
           '<div class="field" style="flex:1; min-width:140px"><label for="payAmount">' + t('Amount received') + '</label>' +
-            '<input id="payAmount" class="input" type="number" min="0" step="0.5" value="' + esc(S.payAmount) + '"></div>' +
+            '<input id="payAmount" class="input" type="number" inputmode="decimal" aria-describedby="payPreview" min="0" step="0.5" value="' + esc(S.payAmount) + '"></div>' +
           '<div class="field" style="flex:1; min-width:130px"><label for="payNote">' + t('Method') + '</label>' +
             '<input id="payNote" class="input" list="payMethods" value="' + esc(S.payNote) + '">' +
             '<datalist id="payMethods"><option value="' + t('Cash') + '"></option><option value="EVC Plus"></option><option value="' + t('Bank transfer') + '"></option></datalist></div>' +
@@ -2879,7 +2856,7 @@ select.input { cursor: pointer; appearance: none;
           '<button type="button" class="chip" data-act="payHalf">' + F.half(money(round2(a.remaining / 2))) + '</button>' +
         '</div>' +
 
-        '<div id="payPreview" style="padding:12px 15px; border-radius:var(--r-md); background:' +
+        '<div id="payPreview" role="status" aria-live="polite" aria-atomic="true" style="padding:12px 15px; border-radius:var(--r-md); background:' +
           (clears ? 'var(--sage-100)' : 'var(--solid-2)') + '; border:1px solid ' +
           (clears ? 'var(--sage-200)' : 'var(--glass-edge)') + '; font-size:13px">' +
           (clears ? F.clearsAccount(esc(a.name.split(' ')[0])) : F.remainingAfter(money(after))) +
@@ -2903,7 +2880,7 @@ select.input { cursor: pointer; appearance: none;
   }
 
   const viewToast = () => !S.toast ? '' :
-    '<div id="toast" class="glass anim-rise no-print" role="status" style="position:fixed; z-index:70; left:50%; transform:translateX(-50%); ' +
+    '<div id="toast" class="glass anim-rise no-print" role="status" aria-live="polite" aria-atomic="true" style="position:fixed; z-index:70; left:50%; transform:translateX(-50%); ' +
       'bottom:' + (S.width >= 1024 ? '26px' : 'calc(84px + env(safe-area-inset-bottom))') + '; padding:11px 20px; border-radius:999px; font-size:13px; font-weight:500; max-width:90vw">' +
       esc(S.toast) + '</div>';
 
@@ -3076,7 +3053,7 @@ select.input { cursor: pointer; appearance: none;
       saveProfile({ lang: el.dataset.lang });
       document.documentElement.lang = el.dataset.lang;
       // Figures are re-labelled, not re-counted: keep them from replaying.
-      numStore.clear(); badgeStore.clear(); firstPaint = false;
+      badgeStore.clear();
       render();
     },
     downloadReportPdf: () => {
@@ -3562,7 +3539,7 @@ select.input { cursor: pointer; appearance: none;
     reset: () => {
       commit(seed());
       S.screen = 'dashboard'; S.customerId = null; S.expanded = null;
-      numStore.clear(); badgeStore.clear();
+      badgeStore.clear();
       render();
       toast(t('Demo data restored'));
     },
@@ -3646,14 +3623,27 @@ select.input { cursor: pointer; appearance: none;
     detail: viewDetail, report: viewReport, settings: viewSettings
   };
   let lastDialog = null;
+  let dialogTrigger = null;
+  const originalBodyOverflow = document.body.style.overflow;
+  function rememberDialogTrigger(trigger) {
+    if (!trigger) return;
+    const peers = Array.from(document.querySelectorAll('[data-act]')).filter(el => el.dataset.act === trigger.dataset.act && el.dataset.id === trigger.dataset.id && el.dataset.screen === trigger.dataset.screen && el.getClientRects().length);
+    dialogTrigger = { act: trigger.dataset.act, id: trigger.dataset.id, screen: trigger.dataset.screen, index: peers.indexOf(trigger) };
+  }
 
   function render() {
     const desktop = S.width >= 1024;                 // sidebar appears here
     const v = { desktop, tablet: S.width >= 768 && !desktop, wide: S.width >= 1300 };
 
     const dialogOpened = S.dialog && S.dialog !== lastDialog;
-    lastDialog = S.dialog;
+    const dialogClosed = lastDialog && !S.dialog;
     const active = document.activeElement;
+    if (dialogOpened) {
+      const trigger = active && active.closest('[data-act]');
+      if (!dialogTrigger) rememberDialogTrigger(trigger);
+    }
+    lastDialog = S.dialog;
+    document.body.style.overflow = S.dialog ? 'hidden' : originalBodyOverflow;
     const focusId = dialogOpened ? null : (active && active.id ? active.id : null);
     const caret = focusId && active && 'selectionStart' in active ? active.selectionStart : null;
     // A background repaint (the overdue tick) must not throw the page to the top.
@@ -3682,6 +3672,12 @@ select.input { cursor: pointer; appearance: none;
       const el = document.getElementById('payAmount'); if (el) { el.focus(); el.select(); }
     }
 
+    if (dialogClosed && dialogTrigger) {
+      const peers = Array.from(document.querySelectorAll('[data-act]')).filter(el => el.dataset.act === dialogTrigger.act && el.dataset.id === dialogTrigger.id && el.dataset.screen === dialogTrigger.screen && el.getClientRects().length);
+      const trigger = peers[dialogTrigger.index] || peers[0];
+      if (trigger) trigger.focus({ preventScroll: true });
+      dialogTrigger = null;
+    }
     if (scrollY && !dialogOpened) window.scrollTo(0, scrollY);
 
     runAnimations();
@@ -3708,6 +3704,7 @@ select.input { cursor: pointer; appearance: none;
     const fn = actions[el.dataset.act];
     if (!fn) return;
     if (el.dataset.act !== 'backdrop') e.stopPropagation();
+    if (!S.dialog) rememberDialogTrigger(el);
     fn(el, e);
   });
 
@@ -3769,7 +3766,16 @@ select.input { cursor: pointer; appearance: none;
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && S.dialog) { S.dialog = null; S.editId = null; render(); return; }
+    if (e.key === 'Tab' && S.dialog) {
+      const dialog = document.querySelector('.modal');
+      const items = Array.from(dialog.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')).filter(el => el.getClientRects().length);
+      const first = items[0], last = items[items.length - 1];
+      if (!items.length) { e.preventDefault(); dialog.focus(); }
+      else if (e.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+      return;
+    }
+    if (e.key === 'Escape' && S.dialog) { e.preventDefault(); S.dialog = null; S.editId = null; render(); return; }
 
     // Enter in the food-add input (Settings page, no dialog open)
     if (e.key === 'Enter' && e.target && e.target.id === 'newFoodInput') {
@@ -3794,6 +3800,15 @@ select.input { cursor: pointer; appearance: none;
     if (crossed) render();
   }
   window.addEventListener('resize', onResize);
+  function syncVisibleViewport() {
+    const viewport = window.visualViewport;
+    document.documentElement.style.setProperty('--ledger-visible-height', (viewport ? viewport.height : window.innerHeight) + 'px');
+    document.documentElement.style.setProperty('--ledger-viewport-top', (viewport ? viewport.offsetTop : 0) + 'px');
+  }
+  window.visualViewport?.addEventListener('resize', syncVisibleViewport);
+  window.visualViewport?.addEventListener('scroll', syncVisibleViewport);
+  window.addEventListener('resize', syncVisibleViewport);
+  syncVisibleViewport();
 
   document.documentElement.lang = S.lang;
 
