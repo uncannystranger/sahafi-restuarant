@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
-<title>Sahafi Rent Book</title>
+<title>Sahafi — Restaurant Credit Ledger</title>
 <meta name="theme-color" content="#c67139">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -936,6 +936,22 @@ select.input { cursor: pointer; appearance: none;
 .backdrop .modal { max-height:calc(var(--ledger-visible-height,100dvh) - 36px); }
 @media(max-width:767px) { .modal { max-height:92dvh; } .modal input, .modal select, .modal textarea { font-size:16px; } .seg { max-width:100%; flex-wrap:wrap; } }
 @media(prefers-reduced-motion:reduce) { .modal, #toast { animation:none; } }
+
+/* Awwwards technology reference: Grassfeld Debts & Loans. Adapt the paired
+   financial surfaces and feature navigation to a restaurant's actual credit book. */
+:root { --bg:#f4efe7;--bg-2:#eee8dd;--r-xl:20px;--r-lg:17px; }
+body::before { background:linear-gradient(155deg,var(--bg),var(--bg-2)); }
+.page-head { padding:8px 0 24px;border-bottom:1px solid var(--glass-edge);margin-bottom:26px; }.page-head h1 { font-size:clamp(29px,3.2vw,43px);font-weight:500;letter-spacing:-.045em; }.page-head .sub { margin-top:10px;line-height:1.8; }
+.sheet,.panel { box-shadow:none;border-color:#72533424; }.sheet-pad { padding:24px; }.section-head { padding-bottom:14px; }.section-head h3 { font-size:19px;font-weight:500; }.sidebar { background:#fffaf2;box-shadow:none;border-right:1px solid #72533424; }.nav-item { border-radius:10px; }.nav-item[aria-current="page"] { box-shadow:none;background:var(--accent-100);border-color:var(--accent-200); }
+.ledger-overview { display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.5fr);gap:14px;margin-bottom:24px; }.ledger-balance-card { background:#e9d5bd;border:1px solid #b88a5f40;border-radius:19px;padding:25px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden; }.ledger-balance-heading { display:flex;justify-content:space-between;align-items:center;color:#744626; }.ledger-balance-heading .eyebrow { font-size:9px;letter-spacing:.12em; }.ledger-balance-card .stat { padding:0;border:0;background:transparent;box-shadow:none;backdrop-filter:none;gap:12px;transform:none; }.ledger-balance-card .stat > .eyebrow { color:#5d4834;font-size:12px;text-transform:none;letter-spacing:0; }.ledger-balance-card .stat .v { font-family:Poppins,sans-serif;font-size:clamp(35px,3.5vw,54px);font-weight:400;letter-spacing:-.06em;color:#422b18;font-variant-numeric:tabular-nums; }.ledger-balance-card .stat .foot { color:#6e5138;font-size:11px; }.ledger-balance-actions { display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:auto; }.ledger-balance-actions .btn-primary { background:#51371f;border-color:#51371f;color:#fffaf2;box-shadow:none;border-radius:9px;min-height:43px;font-size:11px; }.ledger-balance-actions .btn-quiet { font-size:11px;color:#6e3520; }
+.ledger-supporting { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }.ledger-supporting .stat { padding:23px 18px;box-shadow:none;border:1px solid #72533424;background:var(--solid);border-radius:17px;justify-content:center;gap:16px;transform:none; }.ledger-supporting .stat > .eyebrow { font-size:10px;line-height:1.7;color:var(--ink-2); }.ledger-supporting .stat .v { font-family:Poppins,sans-serif;font-size:clamp(24px,2.2vw,34px);font-weight:400;letter-spacing:-.06em; }.ledger-supporting .stat .foot { color:var(--ink-2);font-size:10px;line-height:1.7; }
+.ledger-record-card { background:var(--solid)!important;border-radius:14px!important;padding:18px!important;box-shadow:none; }.ledger-record-card[data-ledger-status="Overdue"] { border-left:3px solid var(--danger)!important; }.tbl tbody tr[data-ledger-status="Overdue"] > td:first-child { box-shadow:inset 3px 0 var(--danger); }.tbl td { padding-block:17px; }.tbl th { letter-spacing:.06em;font-size:9px; }.ledger-balance { letter-spacing:-.03em; }.seg { box-shadow:none;border-radius:10px;background:var(--solid);border:1px solid var(--glass-edge); }.seg-opt { min-height:38px;border-radius:7px; }.seg-opt[aria-pressed="true"] { background:#4f3d2d;color:#fff8ef;box-shadow:none; }
+.btn { transition:transform .2s var(--ease),background-color .2s var(--ease); }.btn-primary:hover { transform:translateY(-2px); }.btn-primary svg:last-child { transition:transform .2s var(--ease); }.btn-primary:hover svg:last-child { transform:translateX(3px); }
+.anim-fade { animation:ledger-page-in .35s var(--ease) both; }.row-enter { animation:ledger-record-in .3s var(--ease) both; }@keyframes ledger-page-in { from { opacity:0;transform:translateY(9px); } }@keyframes ledger-record-in { from { opacity:0;transform:translateY(7px); } }
+@media(max-width:1100px) { .ledger-overview { grid-template-columns:1fr; }.ledger-balance-card { padding:24px; }.ledger-supporting .stat { min-height:145px; }.ledger-supporting .stat .v { font-size:30px; } }
+@media(max-width:600px) { .page-head { padding-bottom:20px; }.page-head h1 { font-size:30px; }.ledger-balance-card { padding:22px;gap:22px; }.ledger-balance-card .stat .v { font-size:46px; }.ledger-supporting { gap:7px; }.ledger-supporting .stat { padding:16px 10px;gap:12px;min-height:140px; }.ledger-supporting .stat .v { font-size:23px; }.ledger-supporting .stat .eyebrow { font-size:8px; }.ledger-supporting .stat .foot { font-size:8px; }.sheet-pad { padding:19px; }.seg { width:100%;display:flex; }.seg-opt { padding-inline:8px;flex:1;min-width:0;font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .anim-fade,.row-enter { animation:none!important; }.btn,.btn svg { transition:none!important;transform:none!important; } }
+
 </style>
 </head>
 <body>
@@ -1646,7 +1662,7 @@ select.input { cursor: pointer; appearance: none;
   /* ══ shared view pieces ═════════════════════════════════════════ */
   function stat(key, label, value, text, opts) {
     const o = opts || {};
-    return '<div class="stat ' + (o.tone ? 'stat-' + o.tone : '') + '">' +
+    return '<div data-stat="' + esc(key) + '" class="stat ' + (o.tone ? 'stat-' + o.tone : '') + '">' +
       '<span class="eyebrow">' + label + '</span>' +
       '<span class="v">' + num(key, value, text) + '</span>' +
       (o.foot ? '<span class="foot">' + o.foot + '</span>' : '') +
@@ -1739,12 +1755,19 @@ select.input { cursor: pointer; appearance: none;
           '</div>'
         : '') +
 
-      '<div class="grid-stats stagger" style="margin-bottom:14px">' +
-        stat('d.consumed', t('Total consumed'), consumed, money(consumed), { foot: F.nTransactions(recs.length) }) +
-        stat('d.collected', t('Collected'), collected, money(collected), { tone: 'sage', foot: F.pctOfBook(rate) }) +
-        stat('d.remaining', t('Outstanding Haraa'), remaining, money(remaining), { tone: 'accent', foot: F.peopleOwing(debtors.length) }) +
-        stat('d.settled', t('Paid in full'), settled.length, String(settled.length), { tone: 'sage', foot: F.ofCustomers(accs.length) }) +
-      '</div>' +
+      '<section class="ledger-overview" aria-label="' + t('Collection progress') + '">' +
+        '<div class="ledger-balance-card">' +
+          '<div class="ledger-balance-heading"><span class="eyebrow">' + (isSo() ? 'BUUGGA DEYNTA CUNTADA' : 'RESTAURANT CREDIT LEDGER') + '</span>' + ic('book', 23, 1.5) + '</div>' +
+          stat('d.remaining', t('Outstanding Haraa'), remaining, money(remaining), { foot: F.peopleOwing(debtors.length) }) +
+          '<div class="ledger-balance-actions"><button class="btn btn-primary" data-act="go" data-screen="rent">' + t('Open book') + ic('up', 16, 2) + '</button>' +
+          (overdueCount ? '<button class="btn btn-quiet" data-act="goOverdue">' + t('Overdue') + ' · ' + overdueCount + '</button>' : '') + '</div>' +
+        '</div>' +
+        '<div class="ledger-supporting">' +
+          stat('d.consumed', t('Total consumed'), consumed, money(consumed), { foot: F.nTransactions(recs.length) }) +
+          stat('d.collected', t('Collected'), collected, money(collected), { tone: 'sage', foot: F.pctOfBook(rate) }) +
+          stat('d.settled', t('Paid in full'), settled.length, String(settled.length), { tone: 'sage', foot: F.ofCustomers(accs.length) }) +
+        '</div>' +
+      '</section>' +
 
       '<div class="dash-cols" style="align-items:start">' +
 
@@ -1882,7 +1905,7 @@ select.input { cursor: pointer; appearance: none;
       rows.map(r => {
         const c = custOf(r.customerId) || { name: 'Unknown', phone: '' };
         const st = recStatus(r);
-        return '<tr data-newid="' + r.id + '">' +
+        return '<tr data-ledger-status="' + st + '" data-newid="' + r.id + '">' +
           '<td><button class="linkish" data-act="openCustomer" data-id="' + r.customerId + '">' +
             '<span class="avatar">' + esc(initials(c.name)) + '</span>' +
             '<span><span style="display:block">' + esc(c.name) + '</span>' +
@@ -1906,7 +1929,7 @@ select.input { cursor: pointer; appearance: none;
         rows.map(r => {
           const c = custOf(r.customerId) || { name: 'Unknown', phone: '' };
           const st = recStatus(r);
-          return '<div data-newid="' + r.id + '" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:13px 14px; display:flex; flex-direction:column; gap:8px">' +
+          return '<div class="ledger-record-card" data-ledger-status="' + st + '" data-newid="' + r.id + '" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:13px 14px; display:flex; flex-direction:column; gap:8px">' +
             '<div style="display:flex; align-items:center; gap:9px">' +
               '<button class="linkish" data-act="openCustomer" data-id="' + r.customerId + '" style="margin-right:auto; font-weight:600">' + esc(c.name) + '</button>' +
               '<span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span>' +
@@ -2164,7 +2187,7 @@ select.input { cursor: pointer; appearance: none;
                 '</tr></thead><tbody>' +
                 a.records.map(r => {
                   const st = recStatus(r);
-                  return '<tr data-newid="' + r.id + '">' +
+                  return '<tr data-ledger-status="' + st + '" data-newid="' + r.id + '">' +
                     '<td class="muted-3" style="white-space:nowrap">' + dateLabel(r.date) + '</td>' +
                     '<td>' + esc(r.food) + (r.note ? '<span style="display:block; font-size:11px; color:var(--ink-3)">' + esc(r.note) + '</span>' : '') + '</td>' +
                     '<td class="r n">' + money(r.total) + '</td>' +
@@ -2181,7 +2204,7 @@ select.input { cursor: pointer; appearance: none;
               : '<div style="display:flex; flex-direction:column; gap:9px">' +
                 a.records.map(r => {
                   const st = recStatus(r);
-                  return '<div data-newid="' + r.id + '" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:11px 13px; display:flex; flex-direction:column; gap:6px">' +
+                  return '<div class="ledger-record-card" data-ledger-status="' + st + '" data-newid="' + r.id + '" style="background:var(--solid-2); border:1px solid var(--glass-edge); border-radius:var(--r-md); padding:11px 13px; display:flex; flex-direction:column; gap:6px">' +
                     '<div style="display:flex; align-items:center; justify-content:space-between">' +
                       '<span style="font-weight:600; font-size:13.5px">' + esc(r.food) + '</span>' +
                       '<span data-badgekey="r.' + r.id + '" data-badgeval="' + st + '">' + badge(st) + '</span>' +
