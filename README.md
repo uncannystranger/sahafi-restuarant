@@ -1,3 +1,5 @@
+> **Latest release: v1.1.0** — [Release notes](RELEASE-NOTES.md) · [GitHub release](https://github.com/uncannystranger/sahafi-restuarant/releases/tag/v1.1.0)
+
 <img src=".github/assets/hero.svg" alt="Sahafi Rent Book — who ate, who paid, who still owes haraa" width="100%"/>
 
 <br/>
